@@ -10,7 +10,6 @@ struct config {
 	int screen_width;
 	int screen_height;
 	int bar_height;
-	double scaling;
 	enum { LOCATION_TOP, LOCATION_BOTTOM } location;
 };
 
@@ -55,7 +54,6 @@ static void activate(GtkApplication* app, gpointer data) {
 		web_ctx, "builtin", uri_handler_builtin, NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(web_view));
 	webkit_web_view_load_uri(web_view, "builtin:");
-	webkit_web_view_set_zoom_level(web_view, conf->scaling);
 	gtk_widget_grab_focus(GTK_WIDGET(web_view));
 
 	// Show
@@ -90,7 +88,7 @@ int main (int argc, char **argv) {
 	GtkApplication *app;
 	int status;
 
-	struct config conf = { 3840, 2160, 64, 2.0, LOCATION_BOTTOM };
+	struct config conf = { 3840, 2160, 32, LOCATION_BOTTOM };
 
 	app = gtk_application_new("coffee.mort.webbar", G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), (gpointer)&conf);
