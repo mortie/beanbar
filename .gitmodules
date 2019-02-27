@@ -1,0 +1,3 @@
+[submodule "vendor/mkjson"]
+	path = vendor/mkjson
+	url = https://github.com/Jacajack/mkjson.git

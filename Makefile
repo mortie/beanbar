@@ -1,15 +1,24 @@
 PKGS = gtk+-3.0 webkit2gtk-4.0
-CFLAGS := -g $(shell pkg-config --cflags $(PKGS)) -Wall -Wextra -Wpedantic $(CFLAGS)
+CFLAGS := $(shell pkg-config --cflags $(PKGS)) -isystem vendor -Wall -Wextra -Wpedantic $(CFLAGS)
 LDFLAGS := $(shell pkg-config --libs $(PKGS)) $(LDFLAGS)
 
-bar: bar.c web.html.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+bar: obj/main.o obj/bar.o obj/ipc.o obj/web.html.o vendor/mkjson/lib/libmkjson.a
+	$(CC) $(LDFLAGS) -o $@ $^
 
-web.html: $(shell find web -type f)
-	$(CPP) -xc -P -o $@ web/index.html
+obj/%.o: src/%.c src/*.h
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $@ -c $<
 
-web.html.o: web.html
+obj/web.html.o: obj/web.html
+	@mkdir -p $(@D)
 	$(LD) -b binary -r -o $@ $<
 
+obj/web.html: $(shell find web -type f)
+	@mkdir -p $(@D)
+	$(CPP) -xc -P -o $@ web/index.html
+
+vendor/mkjson/lib/libmkjson.a:
+	$(MAKE) -C vendor/mkjson
+
 clean:
-	rm -f bar web.html web.html.o
+	rm -rf bar obj
