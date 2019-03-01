@@ -14,8 +14,7 @@ class Battery extends Component {
 				echo "($now / $full) * 100" | bc -l
 				sleep 2;
 			done
-		`, msg =>
-			this.setState({ percent: parseInt(msg) }));
+		`, msg => this.setState({ percent: parseInt(msg) }));
 
 		onUpdate(() => proc.send("\n"));
 	}
@@ -32,8 +31,7 @@ class Wireless extends Component {
 			while read; do
 				nmcli device status | grep connected | awk '{print $4}'
 			done
-		`, msg =>
-			this.setState({ connection: msg.trim() }));
+		`, msg => this.setState({ connection: msg.trim() }));
 
 		onUpdate(() => proc.send("\n"));
 	}
