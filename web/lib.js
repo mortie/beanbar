@@ -23,15 +23,9 @@ window.init = function init(...modules) {
 	update();
 };
 
-window.Label = class Label extends Component {
-	render(props, state) {
-		return h("module", null, props.text);
-	}
-};
-
-window.IPC_EXEC_SH = "sh";
-window.IPC_EXEC_PYTHON = "python3"
-window.IPC_EXEC_C = "f=$(mktemp) && cc -o \"$f\" -xc - && \"$f\"; rm -f \"$f\"";
+window.IPC_EXEC_SH = `sh "$TMPFILE"`;
+window.IPC_EXEC_PYTHON = `python3 "$TMPFILE"`
+window.IPC_EXEC_C = `cc -o "$TMPFILE.bin" -xc "$TMPFILE" && "$TMPFILE.bin"; rm -f "$TMPFILE.bin"`;
 
 let ipcId = 0;
 let ipcCbs = [];

@@ -1,18 +1,23 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "bar.h"
 #include "log.h"
 
+int log_debug = 1;
+
 struct opts {
 	gboolean debug;
+	gboolean debug_print;
 	gint height;
 	gchar *config;
 };
 
 static struct opts opts = {
 	.debug = FALSE,
+	.debug_print = FALSE,
 	.height = 32,
 	.config = NULL,
 };
@@ -20,6 +25,8 @@ static struct bar bar;
 
 static void activate(GtkApplication *app, gpointer data) {
 	(void)data;
+
+	log_debug = opts.debug || opts.debug_print;
 
 	bar.screen_width = 3840;
 	bar.screen_height = 2160;
@@ -51,10 +58,29 @@ static void activate(GtkApplication *app, gpointer data) {
 		warn("Missing config argument.");
 	}
 
-	bar_create_window(&bar, app);
+	bar_init(&bar, app);
 
 	if (opts.debug)
 		bar_show_debug(&bar);
+}
+
+static int in_cleanup = 0;
+static void cleanup(int sig) {
+	(void)sig;
+	if (in_cleanup) {
+		exit(EXIT_FAILURE);
+	} else {
+		in_cleanup = 1;
+		debug("shutdown.");
+		bar_free(&bar);
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void shutdown(GtkApplication *app, gpointer data) {
+	(void)app;
+	(void)data;
+	cleanup(0);
 }
 
 int main (int argc, char **argv) {
@@ -62,11 +88,16 @@ int main (int argc, char **argv) {
 	int status;
 
 	signal(SIGCHLD, SIG_IGN);
+	signal(SIGTERM, cleanup);
+	signal(SIGINT, cleanup);
 
 	GOptionEntry optents[] = {
 		{
 			"debug", 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug,
-			"Show the webkit inspector", NULL,
+			"Enable debugging, including inspector and debug prints", NULL,
+		}, {
+			"debug-print", 'p', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug_print,
+			"Enable debug prints", NULL,
 		}, {
 			"height", '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT, &opts.height,
 			"The height of the bar", NULL,
@@ -81,6 +112,7 @@ int main (int argc, char **argv) {
 	g_application_add_main_option_entries(G_APPLICATION(app), optents);
 
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+	g_signal_connect(app, "shutdown", G_CALLBACK(shutdown), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);
 	g_object_unref(app);
 

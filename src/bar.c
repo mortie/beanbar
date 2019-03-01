@@ -40,7 +40,7 @@ static void uri_handler_config(WebKitURISchemeRequest *req, gpointer data) {
 	g_object_unref(stream);
 }
 
-void bar_create_window(struct bar *bar, GtkApplication *app) {
+void bar_init(struct bar *bar, GtkApplication *app) {
 	bar->win = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(bar->win), "WebBar");
 	gtk_window_set_decorated(GTK_WINDOW(bar->win), FALSE);
@@ -91,6 +91,10 @@ void bar_create_window(struct bar *bar, GtkApplication *app) {
 		break;
 	}
 	set_prop_cardinal(gdkwin, "_NET_WM_STRUT_PARTIAL", (const void *)strut_partial, 12);
+}
+
+void bar_free(struct bar *bar) {
+	ipc_free(&bar->ipc);
 }
 
 void bar_show_debug(struct bar *bar) {

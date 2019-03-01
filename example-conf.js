@@ -10,7 +10,7 @@ ipcSend("exec", `
 		}
 	}
 `, function(msg) {
-	console.log("thing 2 got:", msg);
+	console.log("Received message:", msg);
 });
 
 init(h(Label, { text: "Hello World" }));

@@ -17,8 +17,9 @@ struct bar {
 	struct ipc ipc;
 };
 
-struct bar *bar_create();
-void bar_create_window(struct bar *bar, GtkApplication *app);
+void bar_init(struct bar *bar, GtkApplication *app);
+void bar_free(struct bar *bar);
 void bar_show_debug(struct bar *bar);
+
 
 #endif

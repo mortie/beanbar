@@ -5,10 +5,14 @@
 #include <sys/epoll.h>
 #include <pthread.h>
 
-struct ipc_ent_exec {
+struct ipc_exec_ent {
 	int active;
-	struct epoll_event ev;
+	int pid;
 	int id;
+	int infd;
+	int outfd;
+	int tmpfd;
+	char tmpf[32];
 };
 
 struct ipc {
@@ -16,10 +20,13 @@ struct ipc {
 	int epollfd;
 	pthread_t msgthread;
 
-	struct ipc_ent_exec *exec_ents;
+	int msgpump_pipe[2];
+	struct ipc_exec_ent *exec_ents;
 	size_t exec_ents_len;
 };
 
 void ipc_init(struct ipc *ipc, WebKitWebView *view);
+
+void ipc_free(struct ipc *ipc);
 
 #endif
