@@ -12,6 +12,7 @@ struct opts {
 	gboolean debug;
 	gboolean debug_print;
 	gint height;
+	gboolean top;
 	gchar *config;
 };
 
@@ -19,8 +20,10 @@ static struct opts opts = {
 	.debug = FALSE,
 	.debug_print = FALSE,
 	.height = 32,
+	.top = FALSE,
 	.config = NULL,
 };
+
 static struct bar bar;
 
 static void activate(GtkApplication *app, gpointer data) {
@@ -30,9 +33,12 @@ static void activate(GtkApplication *app, gpointer data) {
 
 	bar.screen_width = 3840;
 	bar.screen_height = 2160;
-	bar.bar_height = 32;
+	bar.bar_height = opts.height;
 	bar.rc = "init(h(Label, { text: 'Missing --config argument.' }));";
-	bar.location = LOCATION_BOTTOM;
+	if (opts.top)
+		bar.location = LOCATION_TOP;
+	else
+		bar.location = LOCATION_BOTTOM;
 
 	if (opts.config != NULL) {
 		struct stat st;
@@ -101,6 +107,9 @@ int main (int argc, char **argv) {
 		}, {
 			"height", '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT, &opts.height,
 			"The height of the bar", NULL,
+		}, {
+			"top", 't', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.top,
+			"Place the bar on top", NULL,
 		}, {
 			"config", 'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_FILENAME, &opts.config,
 			"The config file", NULL,
