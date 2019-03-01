@@ -1,10 +1,21 @@
+#include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "bar.h"
+#include "log.h"
 
 struct opts {
 	gboolean debug;
+	gint height;
+	gchar *config;
 };
 
-static struct opts opts = { 0 };
+static struct opts opts = {
+	.debug = FALSE,
+	.height = 32,
+	.config = NULL,
+};
 static struct bar bar;
 
 static void activate(GtkApplication *app, gpointer data) {
@@ -13,15 +24,31 @@ static void activate(GtkApplication *app, gpointer data) {
 	bar.screen_width = 3840;
 	bar.screen_height = 2160;
 	bar.bar_height = 32;
+	bar.rc = "init(h(Label, { text: 'Missing --config argument.' }));";
 	bar.location = LOCATION_BOTTOM;
-	bar.rc =
-		"init([\n"
-		"    h(Label, { text: 'Hello Left' }),\n"
-		"    [\n"
-		"        h(Label, { text: 'Hello Right L' }),\n"
-		"        h(Label, { text: 'Hello Right R' }),\n"
-		"    ]\n"
-		"]);";
+
+	if (opts.config != NULL) {
+		struct stat st;
+		if (stat(opts.config, &st) < 0) {
+			perror(opts.config);
+			exit(EXIT_FAILURE);
+		}
+
+		FILE *f = fopen(opts.config, "r");
+		if (f == NULL) {
+			perror(opts.config);
+			exit(EXIT_FAILURE);
+		}
+
+		bar.rc = malloc(st.st_size);
+		fread(bar.rc, 1, st.st_size, f);
+		if (ferror(f)) {
+			perror(opts.config);
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		warn("Missing config argument.");
+	}
 
 	bar_create_window(&bar, app);
 
@@ -33,10 +60,18 @@ int main (int argc, char **argv) {
 	GtkApplication *app;
 	int status;
 
+	signal(SIGCHLD, SIG_IGN);
+
 	GOptionEntry optents[] = {
 		{
 			"debug", 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug,
 			"Show the webkit inspector", NULL,
+		}, {
+			"height", '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT, &opts.height,
+			"The height of the bar", NULL,
+		}, {
+			"config", 'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_FILENAME, &opts.config,
+			"The config file", NULL,
 		},
 		{ 0 },
 	};

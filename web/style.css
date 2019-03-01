@@ -9,9 +9,14 @@ html, body {
 	margin: 0px;
 }
 
-body {
-	padding: 0px 8px;
+group {
 	display: flex;
-	align-items: center;
+	flex-direction: row;
 	justify-content: space-between;
+}
+
+module {
+	display: inline-block;
+	padding: 0px 8px;
+	background: #eee;
 }

@@ -9,22 +9,12 @@ function onUpdate(cb) {
 	updateCbs.push(cb);
 }
 
-window.init = function init(modules) {
-	class App extends Component {
-		render() {
-			function renderMod(mod) {
-				if (mod instanceof Array) {
-					return h("div", null, ...mod.map(renderMod));
-				} else {
-					return mod;
-				}
-			}
+window.init = function init(...modules) {
+	render(h('group', null, ...modules), document.body);
 
-			return renderMod(modules);
-		}
-	}
-
-	render(h(App), document.body);
+	document.body.addEventListener("resize", () =>
+		document.body.style.lineHeight = document.body.clientHeight+"px");
+	document.body.style.lineHeight = document.body.clientHeight+"px";
 
 	function update() {
 		updateCbs.forEach(cb => cb());
@@ -34,24 +24,45 @@ window.init = function init(modules) {
 };
 
 window.Label = class Label extends Component {
-	componentDidMount() {
-		this.setState({ count: 0 });
-		onUpdate(() => this.setState({ count: this.state.count + 1 }));
-	}
-
 	render(props, state) {
-		return h("div", null, props.text+": "+state.count);
+		return h("module", null, props.text);
 	}
 };
 
-window.webkit.messageHandlers.ipc.postMessage({
-	type: "no",
-	id: 10,
-	msg: "Hello World",
-});
+let ipcId = 0;
+let ipcCbs = [];
+window.ipcSend = function ipcSend(type, msg, cb) {
+	ipcCbs[ipcId] = cb;
+	window.webkit.messageHandlers.ipc.postMessage({
+		type: type,
+		msg: msg.trim(),
+		id: ipcId++
+	});
+}
 
-window.onIPCMessage = function({ id, msg }) {
-	console.log("ID:", id, "msg:", msg);
+ipcSend("exec", `
+	sh
+	i=0
+	while :; do
+		echo hello $i; i=$(($i + 1))
+		sleep 2
+	done`, function(msg) {
+		console.log("thing 1 got:", msg);
+	});
+
+ipcSend("exec", `
+	sh
+	i=0
+	while :; do
+		echo bye $i
+		i=$(($i + 1))
+		sleep 2
+	done`, function(msg) {
+		console.log("thing 2 got:", msg);
+	});
+
+window.onIPCMessage = function(id, msg) {
+	ipcCbs[id](msg.trim());
 }
 
 })();
