@@ -29,6 +29,10 @@ window.Label = class Label extends Component {
 	}
 };
 
+window.IPC_EXEC_SH = "sh";
+window.IPC_EXEC_PYTHON = "python3"
+window.IPC_EXEC_C = "f=$(mktemp) && cc -o \"$f\" -xc - && \"$f\"; rm -f \"$f\"";
+
 let ipcId = 0;
 let ipcCbs = [];
 window.ipcSend = function ipcSend(type, msg, cb) {
@@ -39,27 +43,6 @@ window.ipcSend = function ipcSend(type, msg, cb) {
 		id: ipcId++
 	});
 }
-
-ipcSend("exec", `
-	sh
-	i=0
-	while :; do
-		echo hello $i; i=$(($i + 1))
-		sleep 2
-	done`, function(msg) {
-		console.log("thing 1 got:", msg);
-	});
-
-ipcSend("exec", `
-	sh
-	i=0
-	while :; do
-		echo bye $i
-		i=$(($i + 1))
-		sleep 2
-	done`, function(msg) {
-		console.log("thing 2 got:", msg);
-	});
 
 window.onIPCMessage = function(id, msg) {
 	ipcCbs[id](msg.trim());

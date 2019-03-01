@@ -40,12 +40,13 @@ static void activate(GtkApplication *app, gpointer data) {
 			exit(EXIT_FAILURE);
 		}
 
-		bar.rc = malloc(st.st_size);
+		bar.rc = malloc(st.st_size + 1);
 		fread(bar.rc, 1, st.st_size, f);
 		if (ferror(f)) {
 			perror(opts.config);
 			exit(EXIT_FAILURE);
 		}
+		bar.rc[st.st_size] = '\0';
 	} else {
 		warn("Missing config argument.");
 	}

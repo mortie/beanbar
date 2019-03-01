@@ -177,6 +177,17 @@ static void *message_pump(void *data) {
 			ssize_t num = read(ev->data.fd, buf, sizeof(buf) - 1);
 			buf[num] = '\0';
 
+			if (num < 0) {
+				perror("read");
+				continue;
+			} else if (num == 0) {
+				debug("%i died.", ent->id);
+				ent->active = 0;
+				if (epoll_ctl(ipc->epollfd, EPOLL_CTL_DEL, ev->data.fd, NULL) < 0)
+					perror("epoll_ctl");
+				continue;
+			}
+
 			// Send the message some time on the main thread
 			struct idle_send_msg *msg = malloc(sizeof(struct idle_send_msg) + num + 1);
 			msg->ipc = ipc;
