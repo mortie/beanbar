@@ -130,6 +130,27 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 	}
 }
 
+static void handle_write(struct ipc *ipc, int id, char *msg) {
+	size_t idx;
+	for (idx = 0; idx < ipc->exec_ents_len; ++idx)
+		if (ipc->exec_ents[idx].id == id) break;
+	if (idx == ipc->exec_ents_len) {
+		warn("ent id doesn't exist: %i", id);
+		return;
+	}
+
+	struct ipc_exec_ent *ent = ipc->exec_ents + idx;
+	if (!ent->active) {
+		warn("ent not active: %i", id);
+		return;
+	}
+
+	if (write(ent->infd, msg, strlen(msg)) < 0) {
+		perror("write");
+		return;
+	}
+}
+
 static void on_msg(
 		WebKitUserContentManager *manager, WebKitJavascriptResult *jsresult,
 		gpointer data) {
@@ -164,6 +185,8 @@ static void on_msg(
 
 	if (strcmp(type, "exec") == 0) {
 		handle_exec(ipc, (int)jsc_value_to_double(valid), jsc_value_to_string(valmsg));
+	} else if (strcmp(type, "write") == 0) {
+		handle_write(ipc, (int)jsc_value_to_double(valid), jsc_value_to_string(valmsg));
 	} else {
 		warn("Unknown IPC message type: %s", type);
 	}

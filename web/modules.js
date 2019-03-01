@@ -6,10 +6,10 @@ class Label extends Component {
 
 class Battery extends Component {
 	componentDidMount() {
-		ipcSend("exec", `
+		let proc = new IPCProc(`
 			${IPC_EXEC_SH}
 			full="$(cat /sys/class/power_supply/BAT0/charge_full)"
-			while :; do
+			while read; do
 				now="$(cat /sys/class/power_supply/BAT0/charge_now)"
 				echo "($now / $full) * 100" | bc -l
 				sleep 2;
@@ -17,6 +17,9 @@ class Battery extends Component {
 		`, msg => {
 			this.setState({ percent: parseInt(msg) });
 		});
+
+		proc.send("\n");
+		setInterval(() => proc.send("\n"), 1000);
 	}
 
 	render(props, state) {
