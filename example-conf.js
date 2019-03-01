@@ -1,4 +1,7 @@
 init(
 	h(Label, { text: "Hello World" }),
-	h(Battery),
+	h("group", null,
+		h(Battery),
+		h(Wireless),
+	),
 );

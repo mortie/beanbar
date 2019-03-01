@@ -4,9 +4,9 @@ let { Component, h, render } = preact;
 window.Component = Component;
 window.h = h;
 
-let updateCbs = [];
-function onUpdate(cb) {
-	updateCbs.push(cb);
+let updates = [];
+window.onUpdate = function(cb) {
+	updates.push(cb);
 }
 
 window.init = function init(...modules) {
@@ -17,10 +17,10 @@ window.init = function init(...modules) {
 	document.body.style.lineHeight = document.body.clientHeight+"px";
 
 	function update() {
-		updateCbs.forEach(cb => cb());
-		setTimeout(update, 1000);
+		updates.forEach(cb => cb());
 	}
 	update();
+	setInterval(update, 5000);
 };
 
 window.IPC_EXEC_SH = `sh "$TMPFILE"`;
