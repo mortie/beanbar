@@ -1,7 +1,10 @@
 init(
 	h(Label, { text: "Hello World" }),
 	h("group", null,
-		h(Battery),
 		h(Wireless),
+		h(Battery),
+		h(Memory),
+		h(Processor),
+		h(Time),
 	),
 );

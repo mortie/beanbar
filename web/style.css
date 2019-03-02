@@ -16,7 +16,12 @@ group {
 }
 
 module {
+	border-right: 1px solid #aaa;
 	display: inline-block;
 	padding: 0px 8px;
 	background: #eee;
+}
+
+group > module:first-child {
+	border-left: 1px solid #aaa;
 }
