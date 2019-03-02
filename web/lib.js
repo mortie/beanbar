@@ -1,6 +1,6 @@
 (function() {
 
-let { Component, h, render } = preact;
+let { Component, VNode, h, render } = preact;
 window.Component = Component;
 window.h = h;
 
@@ -9,7 +9,18 @@ window.onUpdate = function(cb) {
 	updates.push(cb);
 }
 
-window.init = function init(...modules) {
+let conf = {
+	updateTime: 5000,
+};
+
+function confval(c, name) {
+	if (c[name] !== undefined)
+		conf[name] = c[name];
+}
+
+window.init = function init(c, ...modules) {
+	confval(c, "updateTime");
+
 	render(h('group', null, ...modules), document.body);
 
 	document.body.addEventListener("resize", () =>
@@ -20,7 +31,7 @@ window.init = function init(...modules) {
 		updates.forEach(cb => cb());
 	}
 	update();
-	setInterval(update, 5000);
+	setInterval(update, conf.updateTime);
 };
 
 window.IPC_EXEC_SH = `sh "$TMPFILE"`;

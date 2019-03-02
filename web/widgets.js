@@ -71,7 +71,7 @@ class Memory extends Component {
 	render(props, state) {
 		let total = parseInt(state.parts[0]);
 		let used = parseInt(state.parts[1]);
-		return h("module", null, `Mem: ${((used / total) * 100).toFixed(1)}%`);
+		return h("module", null, `Mem: ${((used / total) * 100).toFixed(0)}%`);
 	}
 }
 
