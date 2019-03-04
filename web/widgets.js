@@ -11,8 +11,7 @@ class Battery extends Component {
 	}
 
 	componentDidMount() {
-		let proc = new IPCProc(`
-			${IPC_EXEC_SH}
+		let proc = new IPCProc(IPC_EXEC_SH, `
 			full="$(cat /sys/class/power_supply/BAT0/charge_full)"
 			while read; do
 				now="$(cat /sys/class/power_supply/BAT0/charge_now)"
@@ -36,8 +35,7 @@ class Wireless extends Component {
 	}
 
 	componentDidMount() {
-		let proc = new IPCProc(`
-			${IPC_EXEC_SH}
+		let proc = new IPCProc(IPC_EXEC_SH, `
 			while read; do
 				nmcli device status | grep connected | awk '{print $4}'
 			done
@@ -58,8 +56,7 @@ class Memory extends Component {
 	}
 
 	componentDidMount() {
-		let proc = new IPCProc(`
-			${IPC_EXEC_SH}
+		let proc = new IPCProc(IPC_EXEC_SH, `
 			while read; do
 				free | grep '^Mem' | awk  '{print $2 " " $3}'
 			done
@@ -82,8 +79,7 @@ class Processor extends Component {
 	}
 
 	componentDidMount() {
-		let proc = new IPCProc(`
-			${IPC_EXEC_SH}
+		let proc = new IPCProc(IPC_EXEC_SH, `
 			total() {
 				echo "$1" | awk '{print $2 + $3 + $4 + $5 + $6 + $7 + $8}'
 			}

@@ -38,6 +38,21 @@ window.IPC_EXEC_SH = `sh "$TMPFILE"`;
 window.IPC_EXEC_PYTHON = `python3 "$TMPFILE"`
 window.IPC_EXEC_C = `cc -o "$TMPFILE.bin" -xc "$TMPFILE" && "$TMPFILE.bin"; rm -f "$TMPFILE.bin"`;
 
+function fixIndent(str) {
+	let lines = str.split("\n");
+	while (lines.length > 0 && lines[0].trim() == "")
+		lines.shift();
+	if (lines.length == 0)
+		return str;
+
+	let indents = lines[0].match(/^\s*/)[0];
+	let fixed = "";
+	for (let line of lines) {
+		fixed += line.replace(indents, "")+"\n";
+	}
+	return fixed;
+}
+
 let ipcCbs = [];
 
 window.onIPCMessage = function(id, msg) {
@@ -46,12 +61,12 @@ window.onIPCMessage = function(id, msg) {
 
 let ipcId = 0;
 window.IPCProc = class IPCProc {
-	constructor(msg, cb) {
+	constructor(first, msg, cb) {
 		this.id = ipcId++;
 		window.webkit.messageHandlers.ipc.postMessage({
 			type: "exec",
 			id: this.id,
-			msg: msg,
+			msg: first+"\n"+fixIndent(msg),
 		});
 		ipcCbs[this.id] = cb;
 	}

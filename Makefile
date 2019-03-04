@@ -15,7 +15,7 @@ obj/web.html.o: obj/web.html
 
 obj/web.html: $(shell find web -type f)
 	@mkdir -p $(@D)
-	$(CPP) -xc -P -o $@ web/index.html
+	./web/index.html.sh > "$@"
 
 clean:
 	rm -rf bar obj
