@@ -58,7 +58,7 @@ class Memory extends Component {
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
 			while read; do
-				free | grep '^Mem' | awk  '{print $2 " " $3}'
+				free | grep '^Mem' | awk  '{print $2 " " $7}'
 			done
 		`, msg => this.setState({ parts: msg.split(" ") }));
 
@@ -67,8 +67,9 @@ class Memory extends Component {
 
 	render(props, state) {
 		let total = parseInt(state.parts[0]);
-		let used = parseInt(state.parts[1]);
-		return h("module", null, `Mem: ${((used / total) * 100).toFixed(0)}%`);
+		let available = parseInt(state.parts[1]);
+		let fracUsed = 1 - (available / total);
+		return h("module", null, `Mem: ${Math.round(fracUsed * 100)}%`);
 	}
 }
 
@@ -99,7 +100,7 @@ class Processor extends Component {
 				echo "(1 - ($deltaidle / $deltatotal)) * 100" | bc -l
 				prev="$now"
 			done
-		`, msg => this.setState({ percent: parseInt(msg) }));
+		`, msg => this.setState({ percent: Math.round(parseFloat(msg)) }));
 
 		onUpdate(() => proc.send("\n"));
 	}
