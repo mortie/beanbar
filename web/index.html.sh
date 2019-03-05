@@ -6,17 +6,17 @@ cat <<EOF
 	<head>
 		<meta charset="utf-8">
 		<title>WebBar</title>
-<style>
+		<style>
 $(cat style.css)
-</style>
+		</style>
 	</head>
 	<body>
-<script>
+		<script>
 $(cat vendor/preact.js)
 $(cat lib.js)
 $(cat widgets.js)
-</script>
-<script src="config:"></script>
+		</script>
+		<script src="config:"></script>
 	</body>
 </html>
 EOF

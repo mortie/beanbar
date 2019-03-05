@@ -2,7 +2,7 @@ PKGS = gtk+-3.0 webkit2gtk-4.0
 CFLAGS := $(shell pkg-config --cflags $(PKGS)) -pthread -g -Wall -Wextra -Wpedantic $(CFLAGS)
 LDFLAGS := $(shell pkg-config --libs $(PKGS)) -pthread $(LDFLAGS)
 
-bar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o
+webbar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 obj/%.o: src/%.c src/*.h
@@ -18,4 +18,4 @@ obj/web.html: $(shell find web -type f)
 	./web/index.html.sh > "$@"
 
 clean:
-	rm -rf bar obj
+	rm -rf webbar obj
