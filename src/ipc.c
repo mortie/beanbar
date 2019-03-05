@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include "log.h"
 #include "json.h"
@@ -200,7 +201,8 @@ static void *message_pump(void *data) {
 	while (1) {
 		int ret = epoll_wait(ipc->epollfd, events, count, -1);
 		if (ret < 0) {
-			perror("epoll_wait");
+			if (errno != EINTR)
+				perror("epoll_wait");
 			continue;
 		}
 
