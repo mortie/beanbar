@@ -121,7 +121,7 @@ class Time extends ModComponent {
 	}
 
 	defaultFmt(d) {
-		return d.toDateString()+" "+
+		return d.toDateString()+", "+
 			d.getHours().toString().padStart(2, "0")+":"+
 			d.getMinutes().toString().padStart(2, "0");
 	}
