@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <errno.h>
 
 #include "bar.h"
 #include "log.h"
@@ -26,6 +27,48 @@ static struct opts opts = {
 
 static struct bar bar;
 
+static void read_rc() {
+	char *config = opts.config;
+	char *defaultconf = NULL;
+
+	if (opts.config == NULL) {
+		char *conffile = "webbar.js";
+		const char *confdir = g_get_user_config_dir();
+		size_t conflen = strlen(confdir) + 1 + strlen(conffile);
+		defaultconf = g_malloc(conflen + 1);
+		sprintf(defaultconf, "%s/%s", confdir, conffile);
+		config = defaultconf;
+	}
+
+	struct stat st;
+	if (stat(config, &st) < 0) {
+		if (errno == ENOENT && opts.config == NULL) {
+			warn("No --command argument and no %s.", config);
+			g_free(defaultconf);
+			return;
+		}
+
+		perror(config);
+		exit(EXIT_FAILURE);
+	}
+
+	FILE *f = fopen(config, "r");
+	if (f == NULL) {
+		perror(opts.config);
+		exit(EXIT_FAILURE);
+	}
+
+	bar.rc = g_malloc(st.st_size + 1);
+	fread(bar.rc, 1, st.st_size, f);
+	if (ferror(f)) {
+		perror(config);
+		exit(EXIT_FAILURE);
+	}
+	bar.rc[st.st_size] = '\0';
+
+	g_free(defaultconf);
+}
+
 static void activate(GtkApplication *app, gpointer data) {
 	(void)data;
 
@@ -34,36 +77,13 @@ static void activate(GtkApplication *app, gpointer data) {
 	bar.screen_width = 3840;
 	bar.screen_height = 2160;
 	bar.bar_height = opts.height;
-	bar.rc = "init(h(Label, { text: 'Missing --config argument.' }));";
+	bar.rc = "init(h(Label, { text: 'Missing config file.' }));";
 	if (opts.top)
 		bar.location = LOCATION_TOP;
 	else
 		bar.location = LOCATION_BOTTOM;
 
-	if (opts.config != NULL) {
-		struct stat st;
-		if (stat(opts.config, &st) < 0) {
-			perror(opts.config);
-			exit(EXIT_FAILURE);
-		}
-
-		FILE *f = fopen(opts.config, "r");
-		if (f == NULL) {
-			perror(opts.config);
-			exit(EXIT_FAILURE);
-		}
-
-		bar.rc = g_malloc(st.st_size + 1);
-		fread(bar.rc, 1, st.st_size, f);
-		if (ferror(f)) {
-			perror(opts.config);
-			exit(EXIT_FAILURE);
-		}
-		bar.rc[st.st_size] = '\0';
-	} else {
-		warn("Missing config argument.");
-	}
-
+	read_rc();
 	bar_init(&bar, app);
 
 	if (opts.debug)

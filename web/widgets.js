@@ -1,6 +1,6 @@
 class Label extends ModComponent {
 	render(props, state) {
-		return this.el(props.text);
+		return this.el(null, props.text);
 	}
 };
 
