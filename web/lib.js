@@ -10,6 +10,7 @@ window.ModComponent = class ModComponent extends Component {
 	constructor() {
 		super();
 		this.width = 0;
+		this.widthTime = -1;
 		if (this.css && !modulesWithCss[this.id]) {
 			let sheet = document.createElement("style");
 			sheet.type = "text/css";
@@ -27,9 +28,20 @@ window.ModComponent = class ModComponent extends Component {
 	}
 
 	consistentWidth() {
+		let thresh = 1 * 60 * 1000;
+		let now = new Date().getTime();
+
+		// If it's been a while since it grew,
+		// maybe allow it to shrink again?
+		if (this.width > 0 && now - this.widthTime > thresh) {
+			this.width = 0;
+			this.base.style.minWidth = "";
+		}
+
 		if (this.base.offsetWidth > this.width) {
 			this.width = this.base.offsetWidth;
 			this.base.style.minWidth = this.width+"px";
+			this.widthTime = now;
 		}
 	}
 
