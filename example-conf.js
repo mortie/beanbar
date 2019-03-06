@@ -1,5 +1,5 @@
 init({ updateTime: 3000 },
-	h(Label, { text: "Hello World" }),
+	h(I3Workspaces),
 	h("group", null,
 		h(Wireless),
 		h(Battery),

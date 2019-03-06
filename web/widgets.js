@@ -1,10 +1,10 @@
-class Label extends Component {
+class Label extends ModComponent {
 	render(props, state) {
-		return h("module", null, props.text);
+		return this.el(props.text);
 	}
 };
 
-class Battery extends Component {
+class Battery extends ModComponent {
 	constructor() {
 		super();
 		this.setState({ percent: "?" });
@@ -24,11 +24,11 @@ class Battery extends Component {
 	}
 
 	render(props, state) {
-		return h("module", null, `Bat: ${state.percent}%`);
+		return this.el(`Bat: ${state.percent}%`);
 	}
 }
 
-class Wireless extends Component {
+class Wireless extends ModComponent {
 	constructor() {
 		super();
 		this.setState({ connection: "--" });
@@ -45,11 +45,11 @@ class Wireless extends Component {
 	}
 
 	render(props, state) {
-		return h("module", null, `WiFi: ${state.connection}`);
+		return this.el(`WiFi: ${state.connection}`);
 	}
 }
 
-class Memory extends Component {
+class Memory extends ModComponent {
 	constructor() {
 		super();
 		this.setState({ parts: [ 0, 0 ] });
@@ -69,11 +69,11 @@ class Memory extends Component {
 		let total = parseInt(state.parts[0]);
 		let available = parseInt(state.parts[1]);
 		let fracUsed = 1 - (available / total);
-		return h("module", null, `Mem: ${Math.round(fracUsed * 100)}%`);
+		return this.el(`Mem: ${Math.round(fracUsed * 100)}%`);
 	}
 }
 
-class Processor extends Component {
+class Processor extends ModComponent {
 	constructor() {
 		super();
 		this.setState({ percent: 0 });
@@ -106,11 +106,11 @@ class Processor extends Component {
 	}
 
 	render(props, state) {
-		return h("module", null, `CPU: ${state.percent}%`);
+		return this.el(`CPU: ${state.percent}%`);
 	}
 }
 
-class Time extends Component {
+class Time extends ModComponent {
 	constructor() {
 		super();
 		this.setState({ now: new Date() });
@@ -125,5 +125,95 @@ class Time extends Component {
 			return h("module", null, props.func(state.now));
 		else
 			return h("module", null, state.now.toDateString());
+	}
+}
+
+class I3Workspaces extends ModComponent {
+	constructor() {
+		super();
+		this.setState({ workspaces: [] });
+	}
+
+	componentDidMount() {
+		let proc = new IPCProc(IPC_EXEC_PYTHON, `
+			import socket
+			import sys
+			import subprocess
+			import struct
+
+			try:
+				sockpath = str(subprocess.check_output([ "i3", "--get-socketpath" ]), "utf-8").strip()
+			except:
+				sockpath = str(subprocess.check_output([ "sway", "--get-socketpath" ]), "utf-8").strip()
+
+			sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+			sock.connect(sockpath)
+
+			magic = b"i3-ipc"
+
+			I3_GET_WORKSPACES = 1
+			I3_SUBSCRIBE = 2
+
+			def send(t, payload):
+				if payload == None:
+					msg = magic + struct.pack("=II", 0, t)
+				else:
+					msg = magic + struct.pack("=II", len(payload), t) + bytes(payload, "utf-8")
+				sock.sendall(msg)
+
+			def recv():
+				fmt = "=" + str(len(magic)) + "xII"
+				head = sock.recv(struct.calcsize(fmt))
+				l, t = struct.unpack(fmt, head)
+				payload = sock.recv(l)
+				return payload
+
+			send(I3_GET_WORKSPACES, None)
+			sys.stdout.buffer.write(b"workspaces:" + recv() + b"\\n")
+			sys.stdout.flush()
+
+			send(I3_SUBSCRIBE, '["workspace"]')
+			resp = recv()
+			if resp != b'{"success":true}':
+				raise Exception("Failed to subscribe for workspace events: " + str(resp))
+
+			while True:
+				payload = recv()
+				sys.stdout.buffer.write(b"event:" + payload + b"\\n")
+				sys.stdout.flush()
+		`, this.onMsg.bind(this));
+	}
+
+	onMsg(msg) {
+		if (msg.startsWith("workspaces:")) {
+			msg = msg.substr("workspaces:".length);
+			let arr = JSON.parse(msg);
+			this.state.workspaces = [];
+			arr.forEach(ws => this.state.workspaces[ws.num] = ws);
+			this.setState(this.state);
+		} else if (msg.startsWith("event:")) {
+			msg = msg.substr("event:".length);
+			let evt = JSON.parse(msg);
+			if (evt.change == "focus") {
+				this.state.workspaces[evt.old.num] = evt.old;
+				this.state.workspaces[evt.old.num].focused = false;
+				this.state.workspaces[evt.current.num] = evt.current;
+				this.state.workspaces[evt.current.num].focused = true;
+				this.setState(this.state);
+			} else if (evt.change == "empty") {
+				delete this.state.workspaces[evt.current.num];
+				this.setState(this.state);
+			}
+		}
+	}
+
+	render(props, state) {
+		return this.el(
+			state.workspaces.map(ws => {
+				let className = "workspace ";
+				if (ws.focused) className += "focused ";
+				if (ws.urgent) className += "urgent ";
+				return h("div", { className }, ws.name);
+			}));
 	}
 }

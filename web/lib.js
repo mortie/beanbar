@@ -1,8 +1,14 @@
 (function() {
 
 let { Component, VNode, h, render } = preact;
-window.Component = Component;
+
 window.h = h;
+
+window.ModComponent = class ModComponent extends Component {
+	el(...args) {
+		return h("module", { className: this.constructor.name }, ...args);
+	}
+}
 
 let updates = [];
 window.onUpdate = function(cb) {
@@ -56,19 +62,34 @@ function fixIndent(str) {
 let ipcCbs = [];
 
 window.onIPCMessage = function(id, msg) {
-	ipcCbs[id](msg.trim());
+	ipcCbs[id](msg);
 }
 
 let ipcId = 0;
 window.IPCProc = class IPCProc {
 	constructor(first, msg, cb) {
+		this.buf = "";
 		this.id = ipcId++;
 		window.webkit.messageHandlers.ipc.postMessage({
 			type: "exec",
 			id: this.id,
 			msg: first+"\n"+fixIndent(msg),
 		});
-		ipcCbs[this.id] = cb;
+		ipcCbs[this.id] = this.onMsg.bind(this)
+		this.cb = cb;
+	}
+
+	onMsg(msg) {
+		let parts = msg.split("\n");
+		for (let i = 0; i < parts.length - 1; ++i) {
+			try {
+				this.cb(this.buf + parts[i]);
+			} catch (err) {
+				console.error(err);
+			}
+			this.buf = "";
+		}
+		this.buf += parts[parts.length - 1];
 	}
 
 	send(msg) {

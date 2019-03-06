@@ -21,3 +21,16 @@ module {
 	padding: 0px 8px;
 	background: #eee;
 }
+
+module.I3Workspaces {
+	padding: 0px;
+}
+module.I3Workspaces .workspace {
+	display: inline-block;
+	width: 100vh;
+	text-align: center;
+	background: #ccc;
+}
+module.I3Workspaces .workspace.focused {
+	background: #abc;
+}
