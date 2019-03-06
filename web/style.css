@@ -1,5 +1,8 @@
 * {
 	box-sizing: border-box;
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: default;
 }
 
 html, body {
@@ -22,4 +25,9 @@ module {
 	padding: 0px 8px;
 	background: #eee;
 	white-space: pre;
+}
+
+.clickable {
+	background: #ccc;
+	cursor: pointer;
 }

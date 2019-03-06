@@ -19,8 +19,11 @@ window.ModComponent = class ModComponent extends Component {
 		}
 	}
 
-	el(...args) {
-		return h("module", { className: this.id() }, ...args);
+	el(props, ...args) {
+		if (props == null) props = {};
+		if (props.className == null) props.className = "";
+		props.className += " "+this.id();
+		return h("module", props, ...args);
 	}
 
 	consistentWidth() {
@@ -75,6 +78,9 @@ window.IPCProc = class IPCProc {
 	}
 
 	onMsg(msg) {
+		if (!this.cb)
+			return;
+
 		let parts = msg.split("\n");
 		for (let i = 0; i < parts.length - 1; ++i) {
 			try {

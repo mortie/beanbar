@@ -23,7 +23,7 @@ class Battery extends ModComponent {
 	}
 
 	render(props, state) {
-		return this.el(`Bat: ${state.percent}%`);
+		return this.el(null, `Bat: ${state.percent}%`);
 	}
 }
 
@@ -44,7 +44,7 @@ class Wireless extends ModComponent {
 	}
 
 	render(props, state) {
-		return this.el(`WiFi: ${state.connection}`);
+		return this.el(null, `WiFi: ${state.connection}`);
 	}
 }
 
@@ -70,7 +70,7 @@ class Memory extends ModComponent {
 		let total = parseInt(state.parts[0]);
 		let available = parseInt(state.parts[1]);
 		let percent = Math.round((1 - (available / total)) * 100);
-		return this.el(
+		return this.el(null,
 			h("span", null, "Mem: "),
 			h("span", null, `${percent}%`));
 	}
@@ -111,7 +111,7 @@ class Processor extends ModComponent {
 	}
 
 	render(props, state) {
-		return this.el(
+		return this.el(null,
 			h("span", null, "CPU: "),
 			h("span", null, `${state.percent}%`));
 	}
@@ -135,7 +135,7 @@ class Time extends ModComponent {
 
 	render(props, state) {
 		let func = props.func || this.defaultFmt;
-		return this.el(func(state.now));
+		return this.el(null, func(state.now));
 	}
 }
 
@@ -233,9 +233,9 @@ class I3Workspaces extends ModComponent {
 	}
 
 	render(props, state) {
-		return this.el(
+		return this.el(null,
 			state.workspaces.map(ws => {
-				let className = "workspace ";
+				let className = "workspace clickable ";
 				if (ws.focused) className += "focused ";
 				if (ws.urgent) className += "urgent ";
 				return h("div", {
@@ -255,8 +255,6 @@ class I3Workspaces extends ModComponent {
 			padding: 0px 4px;
 			min-width: 100vh;
 			text-align: center;
-			background: #ccc;
-			cursor: pointer;
 		}
 		module.I3Workspaces .workspace.focused {
 			background: #abc;
