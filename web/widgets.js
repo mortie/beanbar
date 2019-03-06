@@ -147,8 +147,8 @@ class I3Workspaces extends ModComponent {
 
 	componentDidMount() {
 		this.i3msg = new IPCProc(IPC_EXEC_SH, `
-		while read -r ws; do
-			i3-msg "workspace number $ws"
+		while read -r cmd; do
+			i3-msg "$cmd"
 		done
 		`, msg => {});
 
@@ -207,6 +207,67 @@ class I3Workspaces extends ModComponent {
 				else:
 					ipcsend(t, payload)
 		`, this.onMsg.bind(this));
+
+		if (this.props.scroll) {
+			let scrollLim = 150;
+			let minScroll = 10;
+			let recentThresh = 100;
+			let acc = 0;
+			let recent = false;
+			let clearTO = null;
+			document.body.addEventListener("wheel", evt => {
+				if (clearTO) clearTimeout(clearTO);
+				clearTO = setTimeout(() => {
+					acc = 0;
+					recent = false;
+					clearTO = null;
+				}, recentThresh);
+
+				acc += evt.deltaY;
+				let trigger =
+					Math.abs(acc) > scrollLim ||
+					(Math.abs(acc) > minScroll && !recent);
+				if (!trigger)
+					return;
+
+				if (acc > 0)
+					this.nextWorkspace();
+				else if (acc < 0)
+					this.prevWorkspace();
+				acc = 0;
+				recent = true;
+			});
+		}
+	}
+
+	nextWorkspace() {
+		let current = this.state.workspaces.find(ws => ws && ws.focused);
+		if (!current) return;
+		let next;
+		for (let n = current.num + 1; n < this.state.workspaces.length; ++n) {
+			if (this.state.workspaces[n]) {
+				next = this.state.workspaces[n];
+				break;
+			}
+		}
+		if (!next) return;
+
+		this.i3msg.send("workspace number "+next.num);
+	}
+
+	prevWorkspace() {
+		let current = this.state.workspaces.find(ws => ws && ws.focused);
+		if (!current) return;
+		let prev;
+		for (let n = current.num - 1; n >= 0; --n) {
+			if (this.state.workspaces[n]) {
+				prev = this.state.workspaces[n];
+				break;
+			}
+		}
+		if (!prev) return;
+
+		this.i3msg.send("workspace number "+prev.num);
 	}
 
 	onMsg(msg) {
@@ -245,7 +306,7 @@ class I3Workspaces extends ModComponent {
 			if (ws.urgent) className += "urgent ";
 			return h("div", {
 				className,
-				onclick: () => this.i3msg.send(ws.num),
+				onclick: () => this.i3msg.send("workspace number "+ws.num),
 			}, ws.name);
 		});
 

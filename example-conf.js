@@ -3,7 +3,7 @@ config({
 });
 
 init(
-	h(I3Workspaces),
+	h(I3Workspaces, { scroll: true }),
 	h("group", null,
 		h(Wireless),
 		h(Battery),
