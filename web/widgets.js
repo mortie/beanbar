@@ -144,6 +144,7 @@ class I3Workspaces extends ModComponent {
 			import sys
 			import subprocess
 			import struct
+			import json
 
 			try:
 				sockpath = str(subprocess.check_output([ "i3", "--get-socketpath" ]), "utf-8").strip()
@@ -170,42 +171,49 @@ class I3Workspaces extends ModComponent {
 				head = sock.recv(struct.calcsize(fmt))
 				l, t = struct.unpack(fmt, head)
 				payload = sock.recv(l)
-				return payload
+				return payload, t
 
-			send(I3_GET_WORKSPACES, None)
-			sys.stdout.buffer.write(b"workspaces:" + recv() + b"\\n")
-			sys.stdout.flush()
+			def ipcsend(t, payload):
+				sys.stdout.buffer.write(bytes(hex(t), "utf-8") + b":" + payload + b"\\n")
+				sys.stdout.flush()
 
 			send(I3_SUBSCRIBE, '["workspace"]')
-			resp = recv()
-			if resp != b'{"success":true}':
+			if recv()[0] != b'{"success":true}':
 				raise Exception("Failed to subscribe for workspace events: " + str(resp))
 
+			send(I3_GET_WORKSPACES, None)
+
 			while True:
-				payload = recv()
-				sys.stdout.buffer.write(b"event:" + payload + b"\\n")
-				sys.stdout.flush()
+				payload, t = recv()
+				if t == 1:
+					ipcsend(t, payload)
+				else:
+					obj = json.loads(payload)
+					if obj["change"] == "rename":
+						send(I3_GET_WORKSPACES, None)
+					else:
+						ipcsend(t, payload)
 		`, this.onMsg.bind(this));
 	}
 
 	onMsg(msg) {
-		if (msg.startsWith("workspaces:")) {
-			msg = msg.substr("workspaces:".length);
-			let arr = JSON.parse(msg);
+		let type = msg.split(":")[0];
+		let data = JSON.parse(msg.substr(type.length + 1));
+		if (type == "0x1") {
 			this.state.workspaces = [];
-			arr.forEach(ws => this.state.workspaces[ws.num] = ws);
+			data.forEach(ws => this.state.workspaces[ws.num] = ws);
 			this.setState(this.state);
-		} else if (msg.startsWith("event:")) {
-			msg = msg.substr("event:".length);
-			let evt = JSON.parse(msg);
-			if (evt.change == "focus") {
-				this.state.workspaces[evt.old.num] = evt.old;
-				this.state.workspaces[evt.old.num].focused = false;
-				this.state.workspaces[evt.current.num] = evt.current;
-				this.state.workspaces[evt.current.num].focused = true;
+		} else if (type == "0x80000000") {
+			if (data.change == "focus") {
+				if (data.old) {
+					this.state.workspaces[data.old.num] = data.old;
+					this.state.workspaces[data.old.num].focused = false;
+				}
+				this.state.workspaces[data.current.num] = data.current;
+				this.state.workspaces[data.current.num].focused = true;
 				this.setState(this.state);
-			} else if (evt.change == "empty") {
-				delete this.state.workspaces[evt.current.num];
+			} else if (data.change == "empty") {
+				delete this.state.workspaces[data.current.num];
 				this.setState(this.state);
 			}
 		}
