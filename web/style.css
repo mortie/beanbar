@@ -23,17 +23,3 @@ module {
 	background: #eee;
 	white-space: pre;
 }
-
-module.I3Workspaces {
-	padding: 0px;
-}
-module.I3Workspaces .workspace {
-	display: inline-block;
-	padding: 0px 4px;
-	min-width: 100vh;
-	text-align: center;
-	background: #ccc;
-}
-module.I3Workspaces .workspace.focused {
-	background: #abc;
-}

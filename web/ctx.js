@@ -19,6 +19,11 @@ window.config = function config(c) {
 	}
 };
 
+let style = "";
+window.css = function css(str) {
+	style += str;
+}
+
 window.init = function init(...modules) {
 	render(h('group', null, ...modules), document.body);
 
@@ -32,6 +37,13 @@ window.init = function init(...modules) {
 
 	update();
 	setInterval(update, conf.updateTime);
+
+	if (style != "") {
+		let sheet = document.createElement("style");
+		sheet.type = "text/css";
+		sheet.innerHTML = style;
+		document.getElementsByTagName("head")[0].appendChild(sheet);
+	}
 };
 
 })();

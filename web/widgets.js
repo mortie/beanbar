@@ -20,7 +20,7 @@ class Battery extends ModComponent {
 			done
 		`, msg => this.setState({ percent: Math.round(parseFloat(msg)) }));
 
-		onUpdate(() => proc.send("\n"));
+		onUpdate(() => proc.send());
 	}
 
 	render(props, state) {
@@ -41,7 +41,7 @@ class Wireless extends ModComponent {
 			done
 		`, msg => this.setState({ connection: msg.trim() || "?" }));
 
-		onUpdate(() => proc.send("\n"));
+		onUpdate(() => proc.send());
 	}
 
 	render(props, state) {
@@ -64,7 +64,7 @@ class Memory extends ModComponent {
 			done
 		`, msg => this.setState({ parts: msg.split(" ") }));
 
-		onUpdate(() => proc.send("\n"));
+		onUpdate(() => proc.send());
 	}
 
 	render(props, state) {
@@ -108,7 +108,7 @@ class Processor extends ModComponent {
 			done
 		`, msg => this.setState({ percent: Math.round(parseFloat(msg)) }));
 
-		onUpdate(() => proc.send("\n"));
+		onUpdate(() => proc.send());
 	}
 
 	render(props, state) {
@@ -147,6 +147,12 @@ class I3Workspaces extends ModComponent {
 	}
 
 	componentDidMount() {
+		this.i3msg = new IPCProc(IPC_EXEC_SH, `
+			while read -r ws; do
+				i3-msg "workspace number $ws"
+			done
+		`, msg => {});
+
 		let proc = new IPCProc(IPC_EXEC_PYTHON, `
 			import socket
 			import sys
@@ -233,7 +239,28 @@ class I3Workspaces extends ModComponent {
 				let className = "workspace ";
 				if (ws.focused) className += "focused ";
 				if (ws.urgent) className += "urgent ";
-				return h("div", { className }, ws.name);
+				return h("div", {
+					className,
+					onclick: () => this.i3msg.send(ws.num),
+				}, ws.name);
 			}));
+	}
+
+	css() {
+		return `
+			module.I3Workspaces {
+				padding: 0px;
+			}
+			module.I3Workspaces .workspace {
+				display: inline-block;
+				padding: 0px 4px;
+				min-width: 100vh;
+				text-align: center;
+				background: #ccc;
+				cursor: pointer;
+			}
+			module.I3Workspaces .workspace.focused {
+				background: #abc;
+			}`;
 	}
 }

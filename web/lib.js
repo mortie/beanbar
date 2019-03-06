@@ -4,14 +4,23 @@ let { Component, h } = preact;
 
 window.h = h;
 
+let modulesWithCss = {};
+
 window.ModComponent = class ModComponent extends Component {
 	constructor() {
 		super();
 		this.width = 0;
+		if (this.css && !modulesWithCss[this.id]) {
+			let sheet = document.createElement("style");
+			sheet.type = "text/css";
+			sheet.appendChild(document.createTextNode(this.css()));
+			document.getElementsByTagName("head")[0].appendChild(sheet);
+			modulesWithCss[this.id] = true;
+		}
 	}
 
 	el(...args) {
-		return h("module", { className: this.constructor.name }, ...args);
+		return h("module", { className: this.id() }, ...args);
 	}
 
 	consistentWidth() {
@@ -19,6 +28,10 @@ window.ModComponent = class ModComponent extends Component {
 			this.width = this.base.offsetWidth;
 			this.base.style.minWidth = this.width+"px";
 		}
+	}
+
+	id() {
+		return this.constructor.name;
 	}
 };
 
@@ -74,11 +87,11 @@ window.IPCProc = class IPCProc {
 		this.buf += parts[parts.length - 1];
 	}
 
-	send(msg) {
+	send(msg = "") {
 		window.webkit.messageHandlers.ipc.postMessage({
 			type: "write",
 			id: this.id,
-			msg: msg,
+			msg: msg+"\n",
 		});
 	}
 };
