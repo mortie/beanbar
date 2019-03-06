@@ -120,11 +120,15 @@ class Time extends ModComponent {
 		onUpdate(() => this.setState({ now: new Date() }));
 	}
 
+	defaultFmt(d) {
+		return d.toDateString()+" "+
+			d.getHours().toString().padStart(2, "0")+":"+
+			d.getMinutes().toString().padStart(2, "0");
+	}
+
 	render(props, state) {
-		if (props.func)
-			return h("module", null, props.func(state.now));
-		else
-			return h("module", null, state.now.toDateString());
+		let func = props.func || this.defaultFmt;
+		return this.el(func(state.now));
 	}
 }
 
