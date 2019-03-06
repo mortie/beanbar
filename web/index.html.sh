@@ -14,6 +14,7 @@ $(cat style.css)
 		<script>
 $(cat vendor/preact.js)
 $(cat lib.js)
+$(cat ctx.js)
 $(cat widgets.js)
 		</script>
 		<script src="config:"></script>

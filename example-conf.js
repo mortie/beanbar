@@ -1,4 +1,8 @@
-init({ updateTime: 3000 },
+config({
+	updateTime: 3000,
+});
+
+init(
 	h(I3Workspaces),
 	h("group", null,
 		h(Wireless),

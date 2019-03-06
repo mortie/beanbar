@@ -1,6 +1,6 @@
 (function() {
 
-let { Component, VNode, h, render } = preact;
+let { Component, h } = preact;
 
 window.h = h;
 
@@ -8,36 +8,6 @@ window.ModComponent = class ModComponent extends Component {
 	el(...args) {
 		return h("module", { className: this.constructor.name }, ...args);
 	}
-}
-
-let updates = [];
-window.onUpdate = function(cb) {
-	updates.push(cb);
-}
-
-let conf = {
-	updateTime: 5000,
-};
-
-function confval(c, name) {
-	if (c[name] !== undefined)
-		conf[name] = c[name];
-}
-
-window.init = function init(c, ...modules) {
-	confval(c, "updateTime");
-
-	render(h('group', null, ...modules), document.body);
-
-	document.body.addEventListener("resize", () =>
-		document.body.style.lineHeight = document.body.clientHeight+"px");
-	document.body.style.lineHeight = document.body.clientHeight+"px";
-
-	function update() {
-		updates.forEach(cb => cb());
-	}
-	update();
-	setInterval(update, conf.updateTime);
 };
 
 window.IPC_EXEC_SH = `sh "$TMPFILE"`;
@@ -60,12 +30,12 @@ function fixIndent(str) {
 }
 
 let ipcCbs = [];
+let ipcId = 0;
 
 window.onIPCMessage = function(id, msg) {
 	ipcCbs[id](msg);
-}
+};
 
-let ipcId = 0;
 window.IPCProc = class IPCProc {
 	constructor(first, msg, cb) {
 		this.buf = "";
@@ -99,6 +69,6 @@ window.IPCProc = class IPCProc {
 			msg: msg,
 		});
 	}
-}
+};
 
 })();
