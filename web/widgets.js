@@ -142,7 +142,7 @@ class Time extends ModComponent {
 class I3Workspaces extends ModComponent {
 	constructor() {
 		super();
-		this.setState({ workspaces: [] });
+		this.setState({ workspaces: [], mode: "default" });
 	}
 
 	componentDidMount() {
@@ -190,7 +190,7 @@ class I3Workspaces extends ModComponent {
 			sys.stdout.buffer.write(bytes(hex(t), "utf-8") + b":" + payload + b"\\n")
 			sys.stdout.flush()
 
-		send(I3_SUBSCRIBE, '["workspace"]')
+		send(I3_SUBSCRIBE, '["workspace","mode"]')
 		if recv()[0] != b'{"success":true}':
 			raise Exception("Failed to subscribe for workspace events: " + str(resp))
 
@@ -224,31 +224,48 @@ class I3Workspaces extends ModComponent {
 				}
 				this.state.workspaces[data.current.num] = data.current;
 				this.state.workspaces[data.current.num].focused = true;
+				this.state.workspaces[data.current.num].urgent = false;
 				this.setState(this.state);
 			} else if (data.change == "empty") {
 				delete this.state.workspaces[data.current.num];
 				this.setState(this.state);
+			} else if (data.change == "urgent") {
+				this.state.workspaces[data.current.num].urgent = data.current.urgent;
+				this.setState(this.state);
 			}
+		} else if (type == "0x80000002") {
+			this.setState({ mode: data.change });
 		}
 	}
 
 	render(props, state) {
-		return this.el(null,
-			state.workspaces.map(ws => {
-				let className = "workspace clickable ";
-				if (ws.focused) className += "focused ";
-				if (ws.urgent) className += "urgent ";
-				return h("div", {
-					className,
-					onclick: () => this.i3msg.send(ws.num),
-				}, ws.name);
-			}));
+		let workspaces = state.workspaces.map(ws => {
+			let className = "workspace clickable ";
+			if (ws.focused) className += "focused ";
+			if (ws.urgent) className += "urgent ";
+			return h("div", {
+				className,
+				onclick: () => this.i3msg.send(ws.num),
+			}, ws.name);
+		});
+
+		if (state.mode == "default") {
+			return this.el(null, workspaces);
+		} else {
+			return this.el(null,
+				workspaces,
+				h("div", { className: "mode" }, state.mode));
+		}
 	}
 
 	css() {
 		return `
 		module.I3Workspaces {
 			padding: 0px;
+		}
+		module.I3Workspaces .mode {
+			padding: 0px 8px;
+			color: darkred;
 		}
 		module.I3Workspaces .workspace {
 			display: inline-block;
@@ -258,6 +275,10 @@ class I3Workspaces extends ModComponent {
 		}
 		module.I3Workspaces .workspace.focused {
 			background: #abc;
+		}
+		module.I3Workspaces .workspace.urgent {
+			color: red;
+			font-weight: bold;
 		}`;
 	}
 }
