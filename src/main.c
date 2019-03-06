@@ -10,17 +10,17 @@
 int log_debug = 1;
 
 struct opts {
+	gint height;
 	gboolean debug;
 	gboolean debug_print;
-	gint height;
 	gboolean top;
 	gchar *config;
 };
 
 static struct opts opts = {
+	.height = 32,
 	.debug = FALSE,
 	.debug_print = FALSE,
-	.height = 32,
 	.top = FALSE,
 	.config = NULL,
 };
@@ -119,14 +119,14 @@ int main (int argc, char **argv) {
 
 	GOptionEntry optents[] = {
 		{
+			"height", '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT, &opts.height,
+			"The height of the bar", NULL,
+		}, {
 			"debug", 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug,
 			"Enable debugging, including inspector and debug prints", NULL,
 		}, {
 			"debug-print", 'p', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug_print,
 			"Enable debug prints", NULL,
-		}, {
-			"height", '\0', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT, &opts.height,
-			"The height of the bar", NULL,
 		}, {
 			"top", 't', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.top,
 			"Place the bar on top", NULL,
