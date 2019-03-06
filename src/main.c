@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+#include <glib-unix.h>
 
 #include "bar.h"
 #include "log.h"
@@ -91,8 +92,8 @@ static void activate(GtkApplication *app, gpointer data) {
 }
 
 static int in_cleanup = 0;
-static void cleanup(int sig) {
-	(void)sig;
+static gboolean cleanup(gpointer data) {
+	(void)data;
 	if (in_cleanup) {
 		exit(EXIT_FAILURE);
 	} else {
@@ -101,6 +102,13 @@ static void cleanup(int sig) {
 		bar_free(&bar);
 		exit(EXIT_FAILURE);
 	}
+	return TRUE;
+}
+
+static gboolean trigger_update(gpointer data) {
+	(void)data;
+	bar_trigger_update(&bar);
+	return TRUE;
 }
 
 static void shutdown(GtkApplication *app, gpointer data) {
@@ -114,8 +122,9 @@ int main (int argc, char **argv) {
 	int status;
 
 	signal(SIGCHLD, SIG_IGN);
-	signal(SIGTERM, cleanup);
-	signal(SIGINT, cleanup);
+	g_unix_signal_add(SIGTERM, cleanup, NULL);
+	g_unix_signal_add(SIGINT, cleanup, NULL);
+	g_unix_signal_add(SIGUSR2, trigger_update, NULL);
 
 	GOptionEntry optents[] = {
 		{

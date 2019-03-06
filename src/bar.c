@@ -104,3 +104,7 @@ void bar_show_debug(struct bar *bar) {
 	WebKitWebInspector *inspector = webkit_web_view_get_inspector(bar->webview);
 	webkit_web_inspector_show(inspector);
 }
+
+void bar_trigger_update(struct bar *bar) {
+	ipc_trigger_update(&bar->ipc);
+}

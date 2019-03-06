@@ -26,7 +26,7 @@ struct ipc {
 };
 
 void ipc_init(struct ipc *ipc, WebKitWebView *view);
-
 void ipc_free(struct ipc *ipc);
+void ipc_trigger_update(struct ipc *ipc);
 
 #endif

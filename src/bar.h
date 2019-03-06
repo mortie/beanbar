@@ -20,6 +20,6 @@ struct bar {
 void bar_init(struct bar *bar, GtkApplication *app);
 void bar_free(struct bar *bar);
 void bar_show_debug(struct bar *bar);
-
+void bar_trigger_update(struct bar *bar);
 
 #endif

@@ -3,9 +3,13 @@
 let { render } = preact;
 
 let updateListeners = [];
-window.onUpdate = function onUpdate (cb) {
+window.onUpdate = function onUpdate(cb) {
 	updateListeners.push(cb);
 };
+
+window.triggerUpdate = function triggerUpdate() {
+	updateListeners.forEach(cb => cb());
+}
 
 let conf = {
 	updateTime: 5000,
@@ -31,12 +35,8 @@ window.init = function init(...modules) {
 		document.body.style.lineHeight = document.body.clientHeight+"px");
 	document.body.style.lineHeight = document.body.clientHeight+"px";
 
-	function update() {
-		updateListeners.forEach(cb => cb());
-	}
-
-	update();
-	setInterval(update, conf.updateTime);
+	triggerUpdate();
+	setInterval(triggerUpdate, conf.updateTime);
 
 	if (style != "") {
 		let sheet = document.createElement("style");

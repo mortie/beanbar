@@ -10,24 +10,10 @@
 #include "log.h"
 #include "json.h"
 
-static void send_msg_cb(GObject *source, GAsyncResult *res, gpointer data) {
+static void async_result_noop(GObject *source, GAsyncResult *res, gpointer data) {
 	(void)source;
 	(void)res;
 	(void)data;
-}
-
-static void send_msg(struct ipc *ipc, int id, const char *msg) {
-	const char fmt[] = "window.onIPCMessage(%10d, %s);";
-
-	size_t msgjs_len;
-	char *msgjs = json_stringify_string(msg, &msgjs_len);
-
-	char *js = g_malloc(msgjs_len + 10 + sizeof(fmt));
-	sprintf(js, fmt, id, msgjs);
-	g_free(msgjs);
-
-	webkit_web_view_run_javascript(ipc->view, js, NULL, send_msg_cb, js);
-	g_free(js);
 }
 
 struct idle_send_msg {
@@ -38,7 +24,18 @@ struct idle_send_msg {
 
 static gboolean idle_send_msg(void *data) {
 	struct idle_send_msg *msg = (struct idle_send_msg *)data;
-	send_msg(msg->ipc, msg->id, msg->msg);
+
+	const char fmt[] = "window.onIPCMessage(%10d, %s);";
+
+	size_t msgjs_len;
+	char *msgjs = json_stringify_string(msg->msg, &msgjs_len);
+
+	char *js = g_malloc(msgjs_len + 10 + sizeof(fmt));
+	sprintf(js, fmt, msg->id, msgjs);
+	g_free(msgjs);
+
+	webkit_web_view_run_javascript(msg->ipc->view, js, NULL, async_result_noop, NULL);
+	g_free(js);
 	g_free(data);
 	return FALSE;
 }
@@ -299,4 +296,9 @@ void ipc_free(struct ipc *ipc) {
 		unlink(ent->tmpf);
 	}
 	free(ipc->exec_ents);
+}
+
+void ipc_trigger_update(struct ipc *ipc) {
+	const char js[] = "window.triggerUpdate();";
+	webkit_web_view_run_javascript(ipc->view, js, NULL, async_result_noop, NULL);
 }
