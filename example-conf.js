@@ -1,5 +1,5 @@
 config({
-	updateTime: 3000,
+	updateTime: 2000,
 });
 
 init(

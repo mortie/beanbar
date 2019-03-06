@@ -5,8 +5,20 @@ let { Component, h } = preact;
 window.h = h;
 
 window.ModComponent = class ModComponent extends Component {
+	constructor() {
+		super();
+		this.width = 0;
+	}
+
 	el(...args) {
 		return h("module", { className: this.constructor.name }, ...args);
+	}
+
+	consistentWidth() {
+		if (this.base.offsetWidth > this.width) {
+			this.width = this.base.offsetWidth;
+			this.base.style.minWidth = this.width+"px";
+		}
 	}
 };
 

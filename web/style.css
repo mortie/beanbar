@@ -16,10 +16,12 @@ group {
 }
 
 module {
+	display: flex;
+	justify-content: space-between;
 	outline: 1px solid #aaa;
-	display: inline-block;
 	padding: 0px 8px;
 	background: #eee;
+	white-space: pre;
 }
 
 module.I3Workspaces {
@@ -27,7 +29,8 @@ module.I3Workspaces {
 }
 module.I3Workspaces .workspace {
 	display: inline-block;
-	width: 100vh;
+	padding: 0px 4px;
+	min-width: 100vh;
 	text-align: center;
 	background: #ccc;
 }

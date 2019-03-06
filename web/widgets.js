@@ -31,15 +31,15 @@ class Battery extends ModComponent {
 class Wireless extends ModComponent {
 	constructor() {
 		super();
-		this.setState({ connection: "--" });
+		this.setState({ connection: "?" });
 	}
 
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
 			while read; do
-				nmcli device status | grep 'wifi\\s\\+connected' | awk '{print $4}'
+				echo "$(nmcli device status | grep 'wifi\\s\\+connected' | awk '{print $4}')"
 			done
-		`, msg => this.setState({ connection: msg.trim() }));
+		`, msg => this.setState({ connection: msg.trim() || "?" }));
 
 		onUpdate(() => proc.send("\n"));
 	}
@@ -55,6 +55,8 @@ class Memory extends ModComponent {
 		this.setState({ parts: [ 0, 0 ] });
 	}
 
+	componentDidUpdate() { this.consistentWidth(); }
+
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
 			while read; do
@@ -68,8 +70,10 @@ class Memory extends ModComponent {
 	render(props, state) {
 		let total = parseInt(state.parts[0]);
 		let available = parseInt(state.parts[1]);
-		let fracUsed = 1 - (available / total);
-		return this.el(`Mem: ${Math.round(fracUsed * 100)}%`);
+		let percent = Math.round((1 - (available / total)) * 100);
+		return this.el(
+			h("span", null, "Mem: "),
+			h("span", null, `${percent}%`));
 	}
 }
 
@@ -78,6 +82,8 @@ class Processor extends ModComponent {
 		super();
 		this.setState({ percent: 0 });
 	}
+
+	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
@@ -106,7 +112,9 @@ class Processor extends ModComponent {
 	}
 
 	render(props, state) {
-		return this.el(`CPU: ${state.percent}%`);
+		return this.el(
+			h("span", null, "CPU: "),
+			h("span", null, `${state.percent}%`));
 	}
 }
 
