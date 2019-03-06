@@ -90,6 +90,7 @@ void bar_init(struct bar *bar, GtkApplication *app) {
 		}, sizeof(strut_partial));
 		break;
 	}
+
 	set_prop_cardinal(gdkwin, "_NET_WM_STRUT_PARTIAL", (const void *)strut_partial, 12);
 }
 

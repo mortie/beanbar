@@ -1,5 +1,7 @@
 #include "json.h"
 
+#include <gtk/gtk.h>
+
 static char hexchar(char c) {
 	if (c <= 9)
 		return '0' + c;
@@ -10,14 +12,14 @@ static char hexchar(char c) {
 char *json_stringify_string(const char *input, size_t *len) {
 	size_t allocd = 32;
 	*len = 0;
-	char *output = malloc(allocd);
+	char *output = g_malloc(allocd);
 
 	output[(*len)++] = '"';
 
 	while (*input) {
 		if (allocd <= *len + 8) {
 			allocd *= 2;
-			output = realloc(output, allocd);
+			output = g_realloc(output, allocd);
 		}
 
 		if (*input < 0x20) {

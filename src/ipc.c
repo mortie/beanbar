@@ -22,11 +22,12 @@ static void send_msg(struct ipc *ipc, int id, const char *msg) {
 	size_t msgjs_len;
 	char *msgjs = json_stringify_string(msg, &msgjs_len);
 
-	char *js = malloc(msgjs_len + 10 + sizeof(fmt));
+	char *js = g_malloc(msgjs_len + 10 + sizeof(fmt));
 	sprintf(js, fmt, id, msgjs);
+	g_free(msgjs);
 
-	webkit_web_view_run_javascript(ipc->view, js, NULL, send_msg_cb, NULL);
-	free(js);
+	webkit_web_view_run_javascript(ipc->view, js, NULL, send_msg_cb, js);
+	g_free(js);
 }
 
 struct idle_send_msg {
@@ -38,7 +39,7 @@ struct idle_send_msg {
 static gboolean idle_send_msg(void *data) {
 	struct idle_send_msg *msg = (struct idle_send_msg *)data;
 	send_msg(msg->ipc, msg->id, msg->msg);
-	free(data);
+	g_free(data);
 	return FALSE;
 }
 
@@ -183,14 +184,19 @@ static void on_msg(
 	}
 
 	char *type = jsc_value_to_string(valtype);
+	char *msg = jsc_value_to_string(valmsg);
 
 	if (strcmp(type, "exec") == 0) {
-		handle_exec(ipc, (int)jsc_value_to_double(valid), jsc_value_to_string(valmsg));
+		handle_exec(ipc, (int)jsc_value_to_double(valid), msg);
 	} else if (strcmp(type, "write") == 0) {
-		handle_write(ipc, (int)jsc_value_to_double(valid), jsc_value_to_string(valmsg));
+		handle_write(ipc, (int)jsc_value_to_double(valid), msg);
 	} else {
 		warn("Unknown IPC message type: %s", type);
 	}
+
+	g_free(msg);
+	g_free(type);
+	webkit_javascript_result_unref(jsresult);
 }
 
 static void *message_pump(void *data) {
@@ -241,7 +247,7 @@ static void *message_pump(void *data) {
 			}
 
 			// Send the message some time on the main thread
-			struct idle_send_msg *msg = malloc(sizeof(struct idle_send_msg) + num + 1);
+			struct idle_send_msg *msg = g_malloc(sizeof(struct idle_send_msg) + num + 1);
 			msg->ipc = ipc;
 			msg->id = ent->id;
 			strcpy(msg->msg, buf);
