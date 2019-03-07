@@ -1,4 +1,5 @@
 #include "json.h"
+#include "log.h"
 
 #include <gtk/gtk.h>
 
@@ -9,41 +10,45 @@ static char hexchar(char c) {
 		return 'a' + (c - 10);
 }
 
-char *json_stringify_string(const char *input, size_t *len) {
-	size_t allocd = 32;
-	*len = 0;
+char *json_escape_string(const char *input, size_t inputlen, size_t *outputlen) {
+	size_t allocd = (inputlen * 1.2) + 8;
+	*outputlen = 0;
 	char *output = g_malloc(allocd);
 
-	output[(*len)++] = '"';
+	output[(*outputlen)++] = '"';
 
 	while (*input) {
-		if (allocd <= *len + 8) {
+		while (allocd <= *outputlen + 8) {
+			debug("reallocing, consider tuning escape_string. (%zi -> %zi, %zi)", allocd, allocd * 2, inputlen);
 			allocd *= 2;
 			output = g_realloc(output, allocd);
 		}
 
-		if (*input < 0x20) {
-			output[(*len)++] = '\\';
-			output[(*len)++] = 'u';
-			output[(*len)++] = '0';
-			output[(*len)++] = '0';
-			output[(*len)++] = hexchar((*input & 0xf0) >> 4);
-			output[(*len)++] = hexchar(*input & 0x0f);
-		} else if (*input == '\\') {
-			output[(*len)++] = '\\';
-			output[(*len)++] = '\\';
+		if (*input == '\\') {
+			output[(*outputlen)++] = '\\';
+			output[(*outputlen)++] = '\\';
 		} else if (*input == '"') {
-			output[(*len)++] = '\\';
-			output[(*len)++] = '"';
+			output[(*outputlen)++] = '\\';
+			output[(*outputlen)++] = '"';
+		} else if (*input == '\n') {
+			output[(*outputlen)++] = '\\';
+			output[(*outputlen)++] = 'n';
+		} else if (*input < 0x20) {
+			output[(*outputlen)++] = '\\';
+			output[(*outputlen)++] = 'u';
+			output[(*outputlen)++] = '0';
+			output[(*outputlen)++] = '0';
+			output[(*outputlen)++] = hexchar((*input & 0xf0) >> 4);
+			output[(*outputlen)++] = hexchar(*input & 0x0f);
 		} else {
-			output[(*len)++] = *input;
+			output[(*outputlen)++] = *input;
 		}
 
 		input += 1;
 	}
 
-	output[(*len)++] = '"';
-	output[(*len)++] = '\0';
+	output[(*outputlen)++] = '"';
+	output[(*outputlen)++] = '\0';
 
 	return output;
 }

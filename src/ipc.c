@@ -19,6 +19,7 @@ static void async_result_noop(GObject *source, GAsyncResult *res, gpointer data)
 struct idle_send_msg {
 	struct ipc *ipc;
 	int id;
+	size_t msglen;
 	char msg[];
 };
 
@@ -28,7 +29,7 @@ static gboolean idle_send_msg(void *data) {
 	const char fmt[] = "window.onIPCMessage(%10d, %s);";
 
 	size_t msgjs_len;
-	char *msgjs = json_stringify_string(msg->msg, &msgjs_len);
+	char *msgjs = json_escape_string(msg->msg, msg->msglen, &msgjs_len);
 
 	char *js = g_malloc(msgjs_len + 10 + sizeof(fmt));
 	sprintf(js, fmt, msg->id, msgjs);
@@ -247,6 +248,7 @@ static void *message_pump(void *data) {
 			struct idle_send_msg *msg = g_malloc(sizeof(struct idle_send_msg) + num + 1);
 			msg->ipc = ipc;
 			msg->id = ent->id;
+			msg->msglen = num + 1;
 			strcpy(msg->msg, buf);
 			g_idle_add(idle_send_msg, msg);
 		}

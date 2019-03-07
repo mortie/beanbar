@@ -1,5 +1,5 @@
 PKGS = gtk+-3.0 webkit2gtk-4.0
-CFLAGS := $(shell pkg-config --cflags $(PKGS)) -pthread -g -Wall -Wextra -Wpedantic $(CFLAGS)
+CFLAGS := $(shell pkg-config --cflags $(PKGS)) -pthread -O3 -Wall -Wextra -Wpedantic $(CFLAGS)
 LDFLAGS := $(shell pkg-config --libs $(PKGS)) -pthread $(LDFLAGS)
 
 webbar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o

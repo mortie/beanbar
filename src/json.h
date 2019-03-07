@@ -3,6 +3,6 @@
 
 #include <stdlib.h>
 
-char *json_stringify_string(const char *input, size_t *len);
+char *json_escape_string(const char *input, size_t inputlen, size_t *outputlen);
 
 #endif
