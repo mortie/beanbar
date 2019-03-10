@@ -23,7 +23,6 @@ static void set_prop_cardinal(GdkWindow *win, const char *key, const void *val, 
 }
 
 static void uri_handler_builtin(WebKitURISchemeRequest *req, gpointer data) {
-	(void)data;
 	size_t size = (size_t)(&_binary_obj_web_html_end - _binary_obj_web_html_start);
 	GInputStream *stream = g_memory_input_stream_new_from_data(
 		_binary_obj_web_html_start, size, NULL);

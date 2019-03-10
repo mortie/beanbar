@@ -71,8 +71,6 @@ static void read_rc() {
 }
 
 static void activate(GtkApplication *app, gpointer data) {
-	(void)data;
-
 	log_debug = opts.debug || opts.debug_print;
 
 	bar.screen_width = 3840;
@@ -93,7 +91,6 @@ static void activate(GtkApplication *app, gpointer data) {
 
 static int in_cleanup = 0;
 static gboolean cleanup(gpointer data) {
-	(void)data;
 	if (in_cleanup) {
 		exit(EXIT_FAILURE);
 	} else {
@@ -106,14 +103,11 @@ static gboolean cleanup(gpointer data) {
 }
 
 static gboolean trigger_update(gpointer data) {
-	(void)data;
 	bar_trigger_update(&bar);
 	return TRUE;
 }
 
 static void shutdown(GtkApplication *app, gpointer data) {
-	(void)app;
-	(void)data;
 	cleanup(0);
 }
 

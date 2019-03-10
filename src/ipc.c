@@ -10,11 +10,7 @@
 #include "log.h"
 #include "json.h"
 
-static void async_result_noop(GObject *source, GAsyncResult *res, gpointer data) {
-	(void)source;
-	(void)res;
-	(void)data;
-}
+static void async_result_noop(GObject *source, GAsyncResult *res, gpointer data) {}
 
 struct idle_send_msg {
 	struct ipc *ipc;
@@ -154,7 +150,6 @@ static void handle_write(struct ipc *ipc, int id, char *msg) {
 static void on_msg(
 		WebKitUserContentManager *manager, WebKitJavascriptResult *jsresult,
 		gpointer data) {
-	(void)manager;
 	struct ipc *ipc = (struct ipc *)data;
 	JSCValue *val = webkit_javascript_result_get_js_value(jsresult);
 

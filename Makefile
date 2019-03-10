@@ -1,6 +1,6 @@
 PKGS = gtk+-3.0 webkit2gtk-4.0
-CFLAGS := -flto $(shell pkg-config --cflags $(PKGS)) -pthread -O3 -Wall -Wextra -Wpedantic $(CFLAGS)
-LDFLAGS := -flto $(shell pkg-config --libs $(PKGS)) -pthread $(LDFLAGS)
+CFLAGS += -flto $(shell pkg-config --cflags $(PKGS)) -pthread -O3 -Wall -Wextra -Wpedantic -Wno-unused-parameter
+LDFLAGS += -flto $(shell pkg-config --libs $(PKGS)) -pthread
 
 PREFIX ?= /usr/local
 DESTDIR ?=
