@@ -31,15 +31,15 @@ static char *i3_recv(int fd, size_t *len, int *type) {
 
 	char m[sizeof(magic)];
 	uint32_t l, t;
-	read(fd, m, sizeof(m));
-	read(fd, &l, sizeof(l));
-	read(fd, &t, sizeof(t));
+	readall(fd, m, sizeof(m));
+	readall(fd, &l, sizeof(l));
+	readall(fd, &t, sizeof(t));
 
 	if (pllen < (l + 1)) {
 		pllen = l + 1;
 		pl = realloc(pl, pllen);
 	}
-	read(fd, pl, l);
+	readall(fd, pl, l);
 	pl[l] = '\0';
 
 	*len = l;
@@ -95,7 +95,11 @@ static int main(int argc, char **argv) {
 		size_t len;
 		int t;
 		char *msg = i3_recv(sockfd, &len, &t);
-		ipc_sendf("0x%x:%s", t, msg);
+		const char *change = "{\"change\":\"rename\"";
+		if (strncmp(msg, change, strlen(change)) == 0)
+			i3_send(sockfd, I3_GET_WORKSPACES, NULL, 0);
+		else
+			ipc_sendf("0x%x:%s", t, msg);
 	}
 
 	return EXIT_SUCCESS;
