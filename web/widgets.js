@@ -5,23 +5,24 @@ class LoadingWidget extends WidgetComponent {
 
 	css() {
 		return `
-		widget.LoadingWidget,
-		widget.LoadingWidget:after {
-			border-radius: 50%;
-			width: 100vh;
-			height: 100vh;
-		}
 		widget.LoadingWidget {
-			margin: 60px auto;
-			font-size: 10px;
-			position: relative;
-			text-indent: -9999em;
-			border-top: 1.1em solid rgba(0,0,0, 0.2);
-			border-right: 1.1em solid rgba(0,0,0, 0.2);
-			border-bottom: 1.1em solid rgba(0,0,0, 0.2);
-			border-left: 1.1em solid #000000;
-			transform: translateZ(0);
-			animation: LoadingWidget 1.1s infinite linear;
+			vertical-align: top;
+			display: inline-block;
+			height: 50vh;
+			width: 50vh;
+			margin-top: calc(25vh - 1px);
+		}
+		widget.LoadingWidget:after {
+			box-sizing: border-box;
+			content: " ";
+			display: block;
+			height: 50vh;
+			width: 50vh;
+			margin: 1px;
+			border-radius: 50%;
+			border: 3px solid;
+			border-color: #000 transparent #000 transparent;
+			animation: LoadingWidget 1.2s linear infinite;
 		}
 		@keyframes LoadingWidget {
 			0% {

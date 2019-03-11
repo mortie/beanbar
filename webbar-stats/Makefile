@@ -16,6 +16,7 @@ obj/%.o: %.c $(HDR)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+.PHONY: install
 install: webbar-stats
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 webbar-stats $(DESTDIR)$(PREFIX)/bin
@@ -23,3 +24,4 @@ install: webbar-stats
 .PHONY: clean
 clean:
 	rm -rf obj
+	rm -f webbar-stats

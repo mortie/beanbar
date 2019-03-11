@@ -5,11 +5,6 @@ class Label extends ModComponent {
 };
 
 class Battery extends ModComponent {
-	constructor() {
-		super();
-		this.setState({ percent: "?" });
-	}
-
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
 		full="$(cat /sys/class/power_supply/BAT0/charge_full)"
@@ -23,6 +18,9 @@ class Battery extends ModComponent {
 	}
 
 	render(props, state) {
+		if (state.percent == null)
+			return;
+
 		return this.el(null, `Bat: ${state.percent}%`);
 	}
 }
@@ -30,6 +28,7 @@ class Battery extends ModComponent {
 class Network extends ModComponent {
 	componentDidMount() {
 		this.state.connections = {};
+		this.setState();
 
 		let proc = new IPCProc("webbar-stats network", msg => {
 			let [ path, state, name ] = msg.split(":");
@@ -46,13 +45,16 @@ class Network extends ModComponent {
 	}
 
 	render(props, state) {
-		if (!state.connections)
-			return this.el(null, "Net: ?", h(LoadingWidget));
+		if (state.connections == null)
+			return;
 
 		let els = [];
 		for (let key of Object.keys(state.connections)) {
 			let conn = state.connections[key];
-			els.push(h("div", null, conn.name));
+			if (conn.state == "CONNECTING")
+				els.push(h("div", null, conn.name, " ", h(LoadingWidget)));
+			else if (conn.state == "CONNECTED")
+				els.push(h("div", null, conn.name));
 		}
 
 		return this.el(null, "Net: ", els);
@@ -67,11 +69,6 @@ class Network extends ModComponent {
 }
 
 class Memory extends ModComponent {
-	constructor() {
-		super();
-		this.setState({ parts: [ 0, 0 ] });
-	}
-
 	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
@@ -85,6 +82,9 @@ class Memory extends ModComponent {
 	}
 
 	render(props, state) {
+		if (state.parts == null)
+			return;
+
 		let total = parseInt(state.parts[0]);
 		let available = parseInt(state.parts[1]);
 		let percent = Math.round((1 - (available / total)) * 100);
@@ -95,11 +95,6 @@ class Memory extends ModComponent {
 }
 
 class Processor extends ModComponent {
-	constructor() {
-		super();
-		this.setState({ percent: 0 });
-	}
-
 	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
@@ -110,6 +105,9 @@ class Processor extends ModComponent {
 	}
 
 	render(props, state) {
+		if (state.percent == null)
+			return;
+
 		return this.el(null,
 			h("span", null, "CPU: "),
 			h("span", null, `${state.percent}%`));
@@ -117,11 +115,6 @@ class Processor extends ModComponent {
 }
 
 class Time extends ModComponent {
-	constructor() {
-		super();
-		this.setState({ now: new Date() });
-	}
-
 	componentDidMount() {
 		onUpdate(() => this.setState({ now: new Date() }));
 	}
@@ -133,18 +126,18 @@ class Time extends ModComponent {
 	}
 
 	render(props, state) {
+		if (state.now == null)
+			return;
+
 		let func = props.func || this.defaultFmt;
 		return this.el(null, func(state.now));
 	}
 }
 
 class I3Workspaces extends ModComponent {
-	constructor() {
-		super();
-		this.setState({ workspaces: [], mode: "default" });
-	}
-
 	componentDidMount() {
+		this.setState({ mode: "default" });
+
 		this.i3msg = new IPCProc(IPC_EXEC_SH, `
 		while read -r cmd; do
 			i3-msg "$cmd"
@@ -254,6 +247,9 @@ class I3Workspaces extends ModComponent {
 	}
 
 	render(props, state) {
+		if (state.workspaces == null)
+			return;
+
 		let workspaces = state.workspaces.map(ws => {
 			let className = "workspace clickable ";
 			if (ws.focused) className += "focused ";
