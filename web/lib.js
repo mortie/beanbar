@@ -6,17 +6,18 @@ window.h = h;
 
 let modulesWithCss = {};
 
-window.ModComponent = class ModComponent extends Component {
+class Comp extends Component {
 	constructor() {
 		super();
 		this.width = 0;
 		this.widthTime = -1;
-		if (this.css && !modulesWithCss[this.id]) {
+		let id = this.id();
+		if (this.css && !modulesWithCss[id]) {
 			let sheet = document.createElement("style");
 			sheet.type = "text/css";
 			sheet.appendChild(document.createTextNode(this.css()));
 			document.getElementsByTagName("head")[0].appendChild(sheet);
-			modulesWithCss[this.id] = true;
+			modulesWithCss[id] = true;
 		}
 	}
 
@@ -24,7 +25,7 @@ window.ModComponent = class ModComponent extends Component {
 		if (props == null) props = {};
 		if (props.className == null) props.className = "";
 		props.className += " "+this.id();
-		return h("module", props, ...args);
+		return h(this.htmlTag(), props, ...args);
 	}
 
 	consistentWidth() {
@@ -48,7 +49,19 @@ window.ModComponent = class ModComponent extends Component {
 	id() {
 		return this.constructor.name;
 	}
+}
+
+window.ModComponent = class ModComponent extends Comp {
+	htmlTag() {
+		return "module";
+	}
 };
+
+window.WidgetComponent = class WidgetComponent extends Comp {
+	htmlTag() {
+		return "widget";
+	}
+}
 
 window.IPC_EXEC_SH = `sh "$TMPFILE"`;
 window.IPC_EXEC_PYTHON = `python3 "$TMPFILE"`
@@ -78,6 +91,11 @@ window.onIPCMessage = function(id, msg) {
 
 window.IPCProc = class IPCProc {
 	constructor(first, msg, cb) {
+		if (typeof msg == "function" && cb == null) {
+			cb = msg;
+			msg = "";
+		}
+
 		this.buf = "";
 		this.id = ipcId++;
 		window.webkit.messageHandlers.ipc.postMessage({
@@ -93,16 +111,25 @@ window.IPCProc = class IPCProc {
 		if (!this.cb)
 			return;
 
-		let parts = msg.split("\n");
-		for (let i = 0; i < parts.length - 1; ++i) {
+		let parts = [];
+		let str = this.buf;
+		for (let ch of msg) {
+			if (ch == "\n") {
+				parts.push(str);
+				str = "";
+			} else {
+				str += ch;
+			}
+		}
+		this.buf = str;
+
+		for (let part of parts) {
 			try {
-				this.cb(this.buf + parts[i]);
+				this.cb(part);
 			} catch (err) {
 				console.error(err);
 			}
-			this.buf = "";
 		}
-		this.buf += parts[parts.length - 1];
 	}
 
 	send(msg = "") {

@@ -27,24 +27,42 @@ class Battery extends ModComponent {
 	}
 }
 
-class Wireless extends ModComponent {
-	constructor() {
-		super();
-		this.setState({ connection: "?" });
-	}
-
+class Network extends ModComponent {
 	componentDidMount() {
-		let proc = new IPCProc(IPC_EXEC_SH, `
-		while read; do
-			echo "$(nmcli device status | grep 'wifi\\s\\+connected' | awk '{print $4}')"
-		done
-		`, msg => this.setState({ connection: msg.trim() || "?" }));
+		this.state.connections = {};
 
-		onUpdate(() => proc.send());
+		let proc = new IPCProc("webbar-stats network", msg => {
+			let [ path, state, name ] = msg.split(":");
+
+			if (state == "DISCONNECTED" || state == "DISCONNECTING") {
+				if (this.state.connections[path])
+					delete this.state.connections[path];
+			} else {
+				this.state.connections[path] = { name, state };
+			}
+
+			this.setState();
+		});
 	}
 
 	render(props, state) {
-		return this.el(null, `WiFi: ${state.connection}`);
+		if (!state.connections)
+			return this.el(null, "Net: ?", h(LoadingWidget));
+
+		let els = [];
+		for (let key of Object.keys(state.connections)) {
+			let conn = state.connections[key];
+			els.push(h("div", null, conn.name));
+		}
+
+		return this.el(null, "Net: ", els);
+	}
+
+	css() {
+		return `
+		module.Network div:not(:last-child):after {
+			content: ', ';
+		}`;
 	}
 }
 
@@ -85,27 +103,8 @@ class Processor extends ModComponent {
 	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
-		let proc = new IPCProc(IPC_EXEC_SH, `
-		total() {
-			echo "$1" | awk '{print $2 + $3 + $4 + $5 + $6 + $7 + $8}'
-		}
-		idle() {
-			echo "$1" | cut -d' ' -f6
-		}
-		prev="$(cat /proc/stat | head -n 1)"
-		while read; do
-			now="$(cat /proc/stat | head -n 1)"
-			prevtotal="$(total "$prev")"
-			previdle="$(idle "$prev")"
-			nowtotal="$(total "$now")"
-			nowidle="$(idle "$now")"
-
-			deltatotal=$(($nowtotal - $prevtotal))
-			deltaidle=$(($nowidle - $previdle))
-			echo "(1 - ($deltaidle / $deltatotal)) * 100" | bc -l
-			prev="$now"
-		done
-		`, msg => this.setState({ percent: Math.round(parseFloat(msg)) }));
+		let proc = new IPCProc("webbar-stats processor", msg =>
+			this.setState({ percent: msg }));
 
 		onUpdate(() => proc.send());
 	}
@@ -152,61 +151,7 @@ class I3Workspaces extends ModComponent {
 		done
 		`, msg => {});
 
-		let proc = new IPCProc(IPC_EXEC_PYTHON, `
-		import socket
-		import sys
-		import subprocess
-		import struct
-		import json
-
-		try:
-			sockpath = str(subprocess.check_output([ "i3", "--get-socketpath" ]), "utf-8").strip()
-		except:
-			sockpath = str(subprocess.check_output([ "sway", "--get-socketpath" ]), "utf-8").strip()
-
-		sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-		sock.connect(sockpath)
-
-		magic = b"i3-ipc"
-
-		I3_GET_WORKSPACES = 1
-		I3_SUBSCRIBE = 2
-
-		def send(t, payload):
-			if payload == None:
-				msg = magic + struct.pack("=II", 0, t)
-			else:
-				msg = magic + struct.pack("=II", len(payload), t) + bytes(payload, "utf-8")
-			sock.sendall(msg)
-
-		def recv():
-			fmt = "=" + str(len(magic)) + "xII"
-			head = sock.recv(struct.calcsize(fmt))
-			l, t = struct.unpack(fmt, head)
-			payload = sock.recv(l)
-			return payload, t
-
-		def ipcsend(t, payload):
-			sys.stdout.buffer.write(bytes(hex(t), "utf-8") + b":" + payload + b"\\n")
-			sys.stdout.flush()
-
-		send(I3_SUBSCRIBE, '["workspace","mode"]')
-		if recv()[0] != b'{"success":true}':
-			raise Exception("Failed to subscribe for workspace events: " + str(resp))
-
-		send(I3_GET_WORKSPACES, None)
-
-		while True:
-			payload, t = recv()
-			if t == 1:
-				ipcsend(t, payload)
-			else:
-				obj = json.loads(payload)
-				if obj["change"] == "rename":
-					send(I3_GET_WORKSPACES, None)
-				else:
-					ipcsend(t, payload)
-		`, this.onMsg.bind(this));
+		let proc = new IPCProc("webbar-stats i3workspaces", this.onMsg.bind(this));
 
 		if (this.props.scroll) {
 			let scrollLim = 150;
@@ -272,7 +217,16 @@ class I3Workspaces extends ModComponent {
 
 	onMsg(msg) {
 		let type = msg.split(":")[0];
-		let data = JSON.parse(msg.substr(type.length + 1));
+		let json = msg.substr(type.length + 1);
+		let data;
+		try {
+			data = JSON.parse(json);
+		} catch (err) {
+			console.log("Failed to parse JSON:", err);
+			console.log(msg);
+			return;
+		}
+
 		if (type == "0x1") {
 			this.state.workspaces = [];
 			data.forEach(ws => this.state.workspaces[ws.num] = ws);
