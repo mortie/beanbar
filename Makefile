@@ -5,8 +5,14 @@ LDFLAGS += -flto $(shell pkg-config --libs $(PKGS)) -pthread
 PREFIX ?= /usr/local
 DESTDIR ?=
 
+.PHONY: all
+all: webbar webbar-stats/webbar-stats
+
 webbar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o
 	$(CC) $(LDFLAGS) -o $@ $^
+
+webbar-stats/webbar-stats:
+	$(MAKE) -C webbar-stats webbar-stats
 
 obj/%.o: src/%.c src/*.h
 	@mkdir -p $(@D)
@@ -20,9 +26,13 @@ obj/web.html: $(shell find web -type f)
 	@mkdir -p $(@D)
 	./web/index.html.sh > "$@"
 
+.PHONY: install
 install: webbar
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 webbar $(DESTDIR)$(PREFIX)/bin
+	$(MAKE) -C webbar-stats install
 
+.PHONY: clean
 clean:
 	rm -rf webbar obj
+	$(MAKE) -C webbar-stats clean
