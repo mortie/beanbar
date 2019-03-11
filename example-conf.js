@@ -5,7 +5,7 @@ config({
 init(
 	h(I3Workspaces, { scroll: true }),
 	h("group", null,
-		h(Wireless),
+		h(Network),
 		h(Battery),
 		h(Memory),
 		h(Processor),
