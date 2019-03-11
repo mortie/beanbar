@@ -135,6 +135,11 @@ class Time extends ModComponent {
 }
 
 class I3Workspaces extends ModComponent {
+	constructor() {
+		super();
+		this.state = { mons: {}, monId: 0 };
+	}
+
 	componentDidMount() {
 		this.setState({ mode: "default" });
 
@@ -228,7 +233,6 @@ class I3Workspaces extends ModComponent {
 			if (data.change == "focus") {
 				if (data.old) {
 					this.state.workspaces[data.old.num] = data.old;
-					this.state.workspaces[data.old.num].focused = false;
 				}
 				this.state.workspaces[data.current.num] = data.current;
 				this.state.workspaces[data.current.num].focused = true;
@@ -251,7 +255,10 @@ class I3Workspaces extends ModComponent {
 			return;
 
 		let workspaces = state.workspaces.map(ws => {
-			let className = "workspace clickable ";
+			if (state.mons[ws.output] == null)
+				state.mons[ws.output] = state.monId++ % props.numMons;
+
+			let className = `workspace clickable mon-${state.mons[ws.output]} `;
 			if (ws.focused) className += "focused ";
 			if (ws.urgent) className += "urgent ";
 			return h("div", {
@@ -284,12 +291,25 @@ class I3Workspaces extends ModComponent {
 			min-width: 100vh;
 			text-align: center;
 		}
-		module.I3Workspaces .workspace.focused {
-			background: #abc;
-		}
 		module.I3Workspaces .workspace.urgent {
 			color: red;
 			font-weight: bold;
+		}
+		module.I3Workspaces .workspace.focused {
+			background: #bbb;
+		}
+		module.I3Workspaces .workspace.focused.mon-0 {
+			background: #6EBBCA;
+		}
+		module.I3Workspaces .workspace.focused.mon-1 {
+			background: #BAB178;
+		}
+		module.I3Workspaces .workspace.focused.mon-2 {
+			background: #ABB773;
+		}
+		module.I3Workspaces .workspace.focused.mon-3 {
+			background: #94C0A6;
 		}`;
 	}
 }
+I3Workspaces.defaultProps = { numMons: 4 };
