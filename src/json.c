@@ -11,7 +11,7 @@ static char hexchar(char c) {
 }
 
 char *json_escape_string(const char *input, size_t inputlen, size_t *outputlen) {
-	size_t allocd = (inputlen * 1.2) + 8;
+	size_t allocd = (inputlen * 1.3) + 8;
 	*outputlen = 0;
 	char *output = g_malloc(allocd);
 

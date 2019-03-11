@@ -22,12 +22,12 @@ struct idle_send_msg {
 static gboolean idle_send_msg(void *data) {
 	struct idle_send_msg *msg = (struct idle_send_msg *)data;
 
-	const char fmt[] = "window.onIPCMessage(%10d, %s);";
+	const char fmt[] = "window.onIPCMessage(%d, %s);";
 
 	size_t msgjs_len;
 	char *msgjs = json_escape_string(msg->msg, msg->msglen, &msgjs_len);
 
-	char *js = g_malloc(msgjs_len + 10 + sizeof(fmt));
+	char *js = g_malloc(sizeof(fmt) + 10 + msgjs_len);
 	sprintf(js, fmt, msg->id, msgjs);
 	g_free(msgjs);
 
