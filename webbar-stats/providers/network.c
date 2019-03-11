@@ -88,14 +88,16 @@ static void send_active(DBusConnection *conn) {
 	DBusMessageIter subsub;
 	dbus_message_iter_recurse(&sub, &subsub);
 
-	do {
+	int len = dbus_message_iter_get_element_count(&sub);
+	while (len-- > 0) {
 		char *path;
 		dbus_message_iter_get_basic(&subsub, &path);
 		char *name = prop_get_string(
 			conn, "org.freedesktop.NetworkManager", path,
 			"org.freedesktop.NetworkManager.Connection.Active", "Id");
 		ipc_sendf("%s:%s:%s", path, states[STATE_CONNECTED], name);
-	} while (dbus_message_iter_next(&subsub));
+		dbus_message_iter_next(&subsub);
+	}
 
 	dbus_message_unref(reply);
 	return;
