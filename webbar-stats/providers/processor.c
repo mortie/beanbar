@@ -32,8 +32,12 @@ static int main(int argc, char **argv) {
 
 		double deltatotal = now.total - prev.total;
 		double deltaidle = now.idle - prev.idle;
-		double usage = 1.0 - (deltaidle / deltatotal);
-		ipc_sendf("%i", (int)(usage * 100.0));
+		if (deltatotal == 0.0) {
+			ipc_send("0");
+		} else {
+			double usage = 1.0 - (deltaidle / deltatotal);
+			ipc_sendf("%i", (int)(usage * 100.0));
+		}
 		memcpy(&prev, &now, sizeof(prev));
 	}
 
