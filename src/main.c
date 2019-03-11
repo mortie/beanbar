@@ -140,7 +140,7 @@ int main (int argc, char **argv) {
 		{ 0 },
 	};
 
-	app = gtk_application_new("coffee.mort.webbar", G_APPLICATION_FLAGS_NONE);
+	app = gtk_application_new("coffee.mort.webbar", G_APPLICATION_NON_UNIQUE);
 	g_application_add_main_option_entries(G_APPLICATION(app), optents);
 
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
