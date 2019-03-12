@@ -90,18 +90,24 @@ window.onIPCMessage = function(id, msg) {
 };
 
 window.IPCProc = class IPCProc {
-	constructor(first, msg, cb) {
-		if (typeof msg == "function" && cb == null) {
-			cb = msg;
-			msg = "";
+	constructor(head, body, cb) {
+		if (typeof body == "function" && cb == null) {
+			cb = body;
+			body = null;
 		}
+
+		let msg;
+		if (body == null)
+			msg = head;
+		else
+			msg = head + "\n" + fixIndent(body);
 
 		this.buf = "";
 		this.id = ipcId++;
 		window.webkit.messageHandlers.ipc.postMessage({
 			type: "exec",
 			id: this.id,
-			msg: first+"\n"+fixIndent(msg),
+			msg: msg,
 		});
 		ipcCbs[this.id] = this.onMsg.bind(this)
 		this.cb = cb;

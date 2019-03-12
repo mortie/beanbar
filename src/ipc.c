@@ -54,8 +54,8 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 		}
 	}
 
-	if (head == NULL || body == NULL) {
-		warn("Missing head or body (%p, %p).", head, body);
+	if (head == NULL) {
+		warn("%i: Missing head.", id);
 		return;
 	}
 
@@ -67,19 +67,26 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 	}
 
 	char tmpf[32];
-	strcpy(tmpf, "/tmp/webbar.XXXXXX");
-	int tmpfd = mkstemp(tmpf);
-	if (tmpfd < 0) {
-		perror("mkstemp");
-		return;
-	}
-	if (write(tmpfd, body, strlen(body)) < 0) {
-		perror("write");
-		return;
+	int tmpfd;
+	if (body == NULL) {
+		tmpf[0] = '\0';
+		tmpfd = -1;
+	} else {
+		strcpy(tmpf, "/tmp/webbar.XXXXXX");
+		tmpfd = mkstemp(tmpf);
+		if (tmpfd < 0) {
+			perror("mkstemp");
+			return;
+		}
+		if (write(tmpfd, body, strlen(body)) < 0) {
+			perror("write");
+			return;
+		}
 	}
 
 	debug("process %i: %s", id, head);
-	debug("  TMPFILE=%s", tmpf);
+	if (tmpfd >= 0)
+		debug("  TMPFILE=%s", tmpf);
 
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -87,7 +94,8 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 		close(outfd[0]);
 		dup2(infd[0], STDIN_FILENO);
 		dup2(outfd[1], STDOUT_FILENO);
-		setenv("TMPFILE", tmpf, 1);
+		if (tmpfd >= 0)
+			setenv("TMPFILE", tmpf, 1);
 		char *args[] = { "sh", "-c", head, NULL };
 		if (execvp(args[0], args) < 0) {
 			perror(head);
@@ -232,8 +240,10 @@ static void *message_pump(void *data) {
 				waitpid(ent->pid, &status, 0);
 				debug("process %i died (code: %i)", ent->id, WEXITSTATUS(status));
 				ent->active = 0;
-				close(ent->tmpfd);
-				unlink(ent->tmpf);
+				if (ent->tmpfd >= 0) {
+					close(ent->tmpfd);
+					unlink(ent->tmpf);
+				}
 				if (epoll_ctl(ipc->epollfd, EPOLL_CTL_DEL, ev->data.fd, NULL) < 0)
 					perror("epoll_ctl");
 				continue;
