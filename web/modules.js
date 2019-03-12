@@ -4,6 +4,28 @@ class Label extends ModComponent {
 	}
 };
 
+class Disk extends ModComponent {
+	componentDidMount() {
+		let proc = new IPCProc(IPC_EXEC_SH, `
+		read -r mount
+		while read; do
+			df -h "$mount" | awk '{print $4}'
+		done
+		`, msg => this.setState({ avail: msg }));
+		proc.send(this.props.mount);
+
+		onUpdate(() => proc.send());
+	}
+
+	render(props, state) {
+		if (state.avail == null)
+			return;
+
+		return this.el(null, `${props.mount}: ${state.avail}`);
+	}
+}
+Disk.defaultProps = { mount: "/" };
+
 class Battery extends ModComponent {
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
@@ -312,4 +334,4 @@ class I3Workspaces extends ModComponent {
 		}`;
 	}
 }
-I3Workspaces.defaultProps = { numMons: 4 };
+I3Workspaces.defaultProps = { numMons: 4, scroll: false };
