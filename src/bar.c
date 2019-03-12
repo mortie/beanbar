@@ -40,10 +40,15 @@ static void uri_handler_config(WebKitURISchemeRequest *req, gpointer data) {
 }
 
 void bar_init(struct bar *bar, GtkApplication *app) {
+	GdkMonitor *mon = gdk_display_get_primary_monitor(gdk_display_get_default());
+	GdkRectangle geometry;
+	gdk_monitor_get_geometry(mon, &geometry);
+	int scale = gdk_monitor_get_scale_factor(mon);
+
 	bar->win = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(bar->win), "WebBar");
 	gtk_window_set_decorated(GTK_WINDOW(bar->win), FALSE);
-	gtk_window_set_default_size(GTK_WINDOW(bar->win), bar->screen_width, bar->bar_height);
+	gtk_window_set_default_size(GTK_WINDOW(bar->win), geometry.width, bar->bar_height);
 
 	// Create WebKitGTK
 	bar->webview = WEBKIT_WEB_VIEW(webkit_web_view_new());
@@ -76,20 +81,21 @@ void bar_init(struct bar *bar, GtkApplication *app) {
 	switch (bar->location) {
 	case LOCATION_TOP:
 		memcpy(strut_partial, (long[]) {
-			0, 0, bar->bar_height, 0,
+			0, 0, bar->bar_height * scale, 0,
 			0, 0, 0, 0,
-			0, bar->screen_width - 1, 0, 0,
+			geometry.x * scale, (geometry.x + geometry.width) * scale - 1, 0, 0,
 		}, sizeof(strut_partial));
 		break;
 	case LOCATION_BOTTOM:
 		memcpy(strut_partial, (long[]) {
-			0, 0, 0, bar->bar_height,
+			0, 0, 0, bar->bar_height * scale,
 			0, 0, 0, 0,
-			0, 0, 0, bar->screen_width - 1,
+			0, 0, geometry.x * scale, (geometry.x + geometry.width) * scale - 1,
 		}, sizeof(strut_partial));
 		break;
 	}
 
+	set_prop_cardinal(gdkwin, "_NET_WM_STRUT", (const void *)strut_partial, 4);
 	set_prop_cardinal(gdkwin, "_NET_WM_STRUT_PARTIAL", (const void *)strut_partial, 12);
 }
 

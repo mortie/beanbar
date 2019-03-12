@@ -6,8 +6,6 @@
 #include "ipc.h"
 
 struct bar {
-	int screen_width;
-	int screen_height;
 	int bar_height;
 	enum { LOCATION_TOP, LOCATION_BOTTOM } location;
 	char *rc;

@@ -73,8 +73,6 @@ static void read_rc() {
 static void activate(GtkApplication *app, gpointer data) {
 	log_debug = opts.debug || opts.debug_print;
 
-	bar.screen_width = 3840;
-	bar.screen_height = 2160;
 	bar.bar_height = opts.height;
 	bar.rc = "init(h(Label, { text: 'Missing config file.' }));";
 	if (opts.top)
