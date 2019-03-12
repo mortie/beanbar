@@ -110,8 +110,10 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 		for (idx = 0; idx < ipc->exec_ents_len; ++idx)
 			if (!ipc->exec_ents[idx].active) break;
 		if (idx == ipc->exec_ents_len) {
+			pthread_mutex_lock(&ipc->mutex);
 			ipc->exec_ents = realloc(
 				ipc->exec_ents, ++ipc->exec_ents_len * sizeof(*ipc->exec_ents));
+			pthread_mutex_unlock(&ipc->mutex);
 		}
 
 		// Create entry
@@ -226,6 +228,8 @@ static void *message_pump(void *data) {
 				warn("got data on bad FD: %i\n", ev->data.fd);
 				continue;
 			}
+
+			pthread_mutex_lock(&ipc->mutex);
 			struct ipc_exec_ent *ent = ipc->exec_ents + idx;
 
 			char buf[1024];
@@ -234,6 +238,7 @@ static void *message_pump(void *data) {
 
 			if (num < 0) {
 				perror("read");
+				pthread_mutex_unlock(&ipc->mutex);
 				continue;
 			} else if (num == 0) {
 				int status;
@@ -246,6 +251,7 @@ static void *message_pump(void *data) {
 				}
 				if (epoll_ctl(ipc->epollfd, EPOLL_CTL_DEL, ev->data.fd, NULL) < 0)
 					perror("epoll_ctl");
+				pthread_mutex_unlock(&ipc->mutex);
 				continue;
 			}
 
@@ -256,6 +262,7 @@ static void *message_pump(void *data) {
 			msg->msglen = num + 1;
 			strcpy(msg->msg, buf);
 			g_idle_add(idle_send_msg, msg);
+			pthread_mutex_unlock(&ipc->mutex);
 		}
 	}
 
@@ -267,6 +274,7 @@ void ipc_init(struct ipc *ipc, WebKitWebView *view) {
 	ipc->epollfd = epoll_create1(0);
 	ipc->exec_ents = NULL;
 	ipc->exec_ents_len = 0;
+	pthread_mutex_init(&ipc->mutex, NULL);
 	WebKitUserContentManager *webmgr = webkit_web_view_get_user_content_manager(view);
 	g_signal_connect(webmgr, "script-message-received::ipc",
 		G_CALLBACK(on_msg), ipc);

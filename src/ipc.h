@@ -19,6 +19,7 @@ struct ipc {
 	WebKitWebView *view;
 	int epollfd;
 	pthread_t msgthread;
+	pthread_mutex_t mutex;
 
 	int msgpump_pipe[2];
 	struct ipc_exec_ent *exec_ents;
