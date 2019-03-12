@@ -317,7 +317,7 @@ class I3Workspaces extends ModComponent {
 			display: inline-block;
 			position: relative;
 			padding: 0px 4px;
-			min-width: 100vh;
+			min-width: 32px;
 			text-align: center;
 			background: #bbb;
 		}
@@ -335,16 +335,16 @@ class I3Workspaces extends ModComponent {
 			bottom: 0px;
 		}
 		module.I3Workspaces .workspace.visible.mon-0 {
-			background: #6EBBCA;
+			background: #75b6cc;
 		}
 		module.I3Workspaces .workspace.visible.mon-1 {
-			background: #BAB178;
+			background: #b675cc;
 		}
 		module.I3Workspaces .workspace.visible.mon-2 {
-			background: #ABB773;
+			background: #cc8b75;
 		}
 		module.I3Workspaces .workspace.visible.mon-3 {
-			background: #94C0A6;
+			background: #8bcc75;
 		}`;
 	}
 }
