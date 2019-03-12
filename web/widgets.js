@@ -12,7 +12,7 @@ class LoadingWidget extends WidgetComponent {
 			width: 50vh;
 			margin-top: calc(25vh - 1px);
 		}
-		widget.LoadingWidget:after {
+		widget.LoadingWidget::after {
 			box-sizing: border-box;
 			content: " ";
 			display: block;

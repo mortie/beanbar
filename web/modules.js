@@ -159,7 +159,7 @@ class Time extends ModComponent {
 class I3Workspaces extends ModComponent {
 	constructor() {
 		super();
-		this.state = { mons: {}, monId: 0 };
+		this.state = { mons: {}, monId: 0, visible: {} };
 	}
 
 	componentDidMount() {
@@ -249,7 +249,11 @@ class I3Workspaces extends ModComponent {
 
 		if (type == "0x1") {
 			this.state.workspaces = [];
-			data.forEach(ws => this.state.workspaces[ws.num] = ws);
+			data.forEach(ws => {
+				this.state.workspaces[ws.num] = ws;
+				if (ws.visible)
+					this.state.visible[ws.output] = ws.num;
+			});
 			this.setState(this.state);
 		} else if (type == "0x80000000") {
 			if (data.change == "focus") {
@@ -257,8 +261,9 @@ class I3Workspaces extends ModComponent {
 					this.state.workspaces[data.old.num] = data.old;
 				}
 				this.state.workspaces[data.current.num] = data.current;
-				this.state.workspaces[data.current.num].focused = true;
 				this.state.workspaces[data.current.num].urgent = false;
+				this.state.workspaces[data.current.num].focused = true;
+				this.state.visible[data.current.output] = data.current.num;
 				this.setState(this.state);
 			} else if (data.change == "empty") {
 				delete this.state.workspaces[data.current.num];
@@ -281,6 +286,7 @@ class I3Workspaces extends ModComponent {
 				state.mons[ws.output] = state.monId++ % props.numMons;
 
 			let className = `workspace clickable mon-${state.mons[ws.output]} `;
+			if (state.visible[ws.output] == ws.num) className += "visible ";
 			if (ws.focused) className += "focused ";
 			if (ws.urgent) className += "urgent ";
 			return h("div", {
@@ -309,27 +315,35 @@ class I3Workspaces extends ModComponent {
 		}
 		module.I3Workspaces .workspace {
 			display: inline-block;
+			position: relative;
 			padding: 0px 4px;
 			min-width: 100vh;
 			text-align: center;
+			background: #bbb;
 		}
 		module.I3Workspaces .workspace.urgent {
 			color: red;
 			font-weight: bold;
 		}
-		module.I3Workspaces .workspace.focused {
-			background: #bbb;
+		module.I3Workspaces .workspace.focused::after {
+			position: absolute;
+			content: " ";
+			background: darkred;
+			width: 100%;
+			height: 3px;
+			left: 0px;
+			bottom: 0px;
 		}
-		module.I3Workspaces .workspace.focused.mon-0 {
+		module.I3Workspaces .workspace.visible.mon-0 {
 			background: #6EBBCA;
 		}
-		module.I3Workspaces .workspace.focused.mon-1 {
+		module.I3Workspaces .workspace.visible.mon-1 {
 			background: #BAB178;
 		}
-		module.I3Workspaces .workspace.focused.mon-2 {
+		module.I3Workspaces .workspace.visible.mon-2 {
 			background: #ABB773;
 		}
-		module.I3Workspaces .workspace.focused.mon-3 {
+		module.I3Workspaces .workspace.visible.mon-3 {
 			background: #94C0A6;
 		}`;
 	}
