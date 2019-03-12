@@ -27,6 +27,12 @@ static char *states[] = {
 
 size_t states_len = sizeof(states) / sizeof(*states);
 
+static int is_valid_type(char *type) {
+	if (strcmp(type, "bridge") == 0)
+		return 0;
+	return 1;
+}
+
 static DBusMessage *prop_get(
 		DBusConnection *conn, const char *target, const char *object,
 		const char *iface, const char *prop) {
@@ -92,6 +98,15 @@ static void send_active(DBusConnection *conn) {
 	while (len-- > 0) {
 		char *path;
 		dbus_message_iter_get_basic(&subsub, &path);
+
+		char *type = prop_get_string(
+			conn, "org.freedesktop.NetworkManager", path,
+			"org.freedesktop.NetworkManager.Connection.Active", "Type");
+		if (!is_valid_type(type)) {
+			dbus_message_iter_next(&subsub);
+			continue;
+		}
+
 		char *name = prop_get_string(
 			conn, "org.freedesktop.NetworkManager", path,
 			"org.freedesktop.NetworkManager.Connection.Active", "Id");
@@ -124,6 +139,12 @@ static void handle_state_changed(DBusConnection *conn, DBusMessage *msg) {
 		ipc_sendf("%s:%s:", dbus_message_get_path(msg), states[val]);
 		return;
 	}
+
+	char *type = prop_get_string(
+		conn, "org.freedesktop.NetworkManager", dbus_message_get_path(msg),
+		"org.freedesktop.NetworkManager.Connection.Active", "Type");
+	if (!is_valid_type(type))
+		return;
 
 	char *name = prop_get_string(
 		conn, "org.freedesktop.NetworkManager", dbus_message_get_path(msg),
