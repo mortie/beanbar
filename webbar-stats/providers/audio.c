@@ -3,14 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pulse/pulseaudio.h>
+#include <math.h>
 
 #include "src/ipc.h"
 
 static void sink_info_callback(
 		pa_context *c, const pa_sink_info *i, int eol, void *data) {
 	if (eol) return;
-	float volume = (float)pa_cvolume_avg(&(i->volume)) / (float)PA_VOLUME_NORM;
-	ipc_sendf("%s:%s:%i:%i", i->name, i->description, (int)(volume * 100.0), i->mute);
+	double volume = (double)pa_cvolume_avg(&(i->volume)) / (double)PA_VOLUME_NORM;
+	int percent = round(volume * 100.0);
+	ipc_sendf("%s:%s:%i:%i", i->name, i->description, percent, i->mute);
 }
 
 static void subscribe_callback(
