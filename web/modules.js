@@ -4,6 +4,44 @@ class Label extends ModComponent {
 	}
 };
 
+class Audio extends ModComponent {
+	componentDidMount() {
+		this.state.sinks = {};
+		this.setState();
+
+		let proc = new IPCProc("webbar-stats audio", msg => {
+			let [ name, desc, vol, muted ] = msg.split(":");
+			this.state.sinks[name] = { desc, vol, muted: muted == 1 };
+			this.setState({ sinks: this.state.sinks });
+		});
+	}
+
+	render(props, state) {
+		if (state.sinks == null)
+			return;
+
+		let els = [];
+		for (let key of Object.keys(state.sinks)) {
+			let sink = state.sinks[key];
+			let className = "";
+			if (sink.muted) className += "muted ";
+			els.push(h("div", { className }, sink.vol+"%"));
+		}
+
+		return this.el(null, `Vol: `, els);
+	}
+
+	css() {
+		return `
+		module.Audio div.muted {
+			color: darkred;
+		}
+		module.Network div:not(:last-child):after {
+			content: ", ";
+		}`;
+	}
+}
+
 class Disk extends ModComponent {
 	componentDidMount() {
 		let proc = new IPCProc(IPC_EXEC_SH, `
