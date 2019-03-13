@@ -34,3 +34,91 @@ class LoadingWidget extends WidgetComponent {
 		}`;
 	}
 }
+
+class SliderWidget extends WidgetComponent {
+	change(evt, cb) {
+		evt.preventDefault();
+
+		let e = evt;
+		if (cb == null)
+			return;
+
+		if (evt.type == "mousemove" && evt.buttons != 1)
+			return;
+
+		else if (evt.type == "touchmove")
+			e = evt.touches[0];
+
+		let outer = evt.target;
+		while (outer.className != "outer")
+			outer = outer.parentElement;
+
+		let left = outer.offsetLeft;
+		let width = outer.offsetWidth;
+		let frac = (e.clientX - left) / width;
+		if (frac < 0.03)
+			frac = 0;
+		else if (frac > 0.97)
+			frac = 1;
+
+		cb(frac * (this.props.max - this.props.min) + this.props.min, evt);
+	}
+
+	onWheel(evt, cb) {
+		evt.stopPropagation();
+
+		if (cb == null)
+			return;
+
+		let delta = evt.deltaY / 300;
+		let scale = this.props.max - this.props.min;
+		let frac = (this.props.val - this.props.min) / scale + delta;
+		if (frac < 0)
+			frac = 0;
+		else if (frac > 1)
+			frac = 1;
+
+		cb(frac * scale + this.props.min, evt);
+	}
+
+	render(props, state) {
+		let percent = ((props.val - props.min) / (props.max - props.min)) * 100;
+		return this.el(null,
+			h("div", {
+				className: "outer",
+				onClick: evt => this.change(evt, props.change),
+				onMouseMove: evt => this.change(evt, props.change),
+				onTouchMove: evt => this.change(evt, props.change),
+				onWheel: evt => this.onWheel(evt, props.change) },
+				h("div", {
+					className: "inner",
+					style: `width: ${percent}%` }),
+				h("div", { className: "info" },
+					`${props.val.toFixed(0)}`)));
+	}
+
+	css() {
+		return `
+		widget.SliderWidget .outer {
+			width: 100px;
+			height: 100%;
+			position: relative;
+			background: #eee;
+			border-radius: 4px;
+			box-shadow: 0 4px 5px rgba(0, 0, 0, 0.25) inset;
+		}
+
+		widget.SliderWidget .inner {
+			border-radius: 4px;
+			background: #75b6cc;
+			height: 100%;
+		}
+
+		widget.SliderWidget .info {
+			position: absolute;
+			top: 0px;
+			left: 8px;
+		}`;
+	}
+}
+SliderWidget.defaultProps = { min: 0, max: 100, val: 10 };
