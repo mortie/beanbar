@@ -49,6 +49,7 @@ void bar_init(struct bar *bar, GtkApplication *app) {
 	gtk_window_set_title(GTK_WINDOW(bar->win), "WebBar");
 	gtk_window_set_decorated(GTK_WINDOW(bar->win), FALSE);
 	gtk_window_set_default_size(GTK_WINDOW(bar->win), geometry.width, bar->bar_height);
+	gtk_window_move(GTK_WINDOW(bar->win), geometry.x, geometry.y + geometry.height - bar->bar_height);
 
 	// Create WebKitGTK
 	bar->webview = WEBKIT_WEB_VIEW(webkit_web_view_new());
@@ -75,6 +76,7 @@ void bar_init(struct bar *bar, GtkApplication *app) {
 
 	// Make the bar->win a dock
 	set_prop_atom(gdkwin, "_NET_WM_WINDOW_TYPE", "_NET_WM_WINDOW_TYPE_DOCK");
+	set_prop_atom(gdkwin, "_NET_WM_WINDOW_STATE", "_NET_WM_STATE_ABOVE");
 
 	// Set dock location
 	long strut_partial[12];
@@ -97,6 +99,12 @@ void bar_init(struct bar *bar, GtkApplication *app) {
 
 	set_prop_cardinal(gdkwin, "_NET_WM_STRUT", (const void *)strut_partial, 4);
 	set_prop_cardinal(gdkwin, "_NET_WM_STRUT_PARTIAL", (const void *)strut_partial, 12);
+
+	long opaque_region[] = {
+		geometry.x * scale, (geometry.y + geometry.height - bar->bar_height) * scale,
+		geometry.width * scale, bar->bar_height * scale,
+	};
+	set_prop_cardinal(gdkwin, "_NET_WM_OPAQUE_REGION", (const void *)opaque_region, 4);
 }
 
 void bar_free(struct bar *bar) {
