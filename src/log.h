@@ -15,4 +15,9 @@ extern int log_debug;
 	fprintf(stderr, "\n"); \
 } while (0)
 
+#define err(...) do { \
+	fprintf(stderr, "(err) " __VA_ARGS__); \
+	fprintf(stderr, "\n"); \
+} while (0)
+
 #endif

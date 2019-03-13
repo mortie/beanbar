@@ -10,6 +10,7 @@ struct bar {
 	int bar_height;
 	enum { LOCATION_TOP, LOCATION_BOTTOM } location;
 	char *rc;
+	char *monitor;
 
 	GtkWidget *win;
 	WebKitWebView *webview;

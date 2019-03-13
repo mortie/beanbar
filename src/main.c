@@ -16,6 +16,7 @@ struct opts {
 	gboolean debug_print;
 	gboolean top;
 	gchar *config;
+	gchar *monitor;
 };
 
 static struct opts opts = {
@@ -24,6 +25,7 @@ static struct opts opts = {
 	.debug_print = FALSE,
 	.top = FALSE,
 	.config = NULL,
+	.monitor = NULL,
 };
 
 static struct bar bar;
@@ -79,6 +81,7 @@ static void activate(GtkApplication *app, gpointer data) {
 		bar.location = LOCATION_TOP;
 	else
 		bar.location = LOCATION_BOTTOM;
+	bar.monitor = opts.monitor;
 
 	read_rc();
 	bar_init(&bar, app);
@@ -134,6 +137,9 @@ int main (int argc, char **argv) {
 		}, {
 			"config", 'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_FILENAME, &opts.config,
 			"The config file", NULL,
+		}, {
+			"monitor", 'm', G_OPTION_FLAG_NONE, G_OPTION_ARG_FILENAME, &opts.monitor,
+			"The monitor to put the bar on", NULL,
 		},
 		{ 0 },
 	};

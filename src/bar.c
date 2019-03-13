@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "log.h"
+
 extern const uint8_t _binary_obj_web_html_start[];
 extern const uint8_t _binary_obj_web_html_end;
 
@@ -40,7 +42,27 @@ static void uri_handler_config(WebKitURISchemeRequest *req, gpointer data) {
 }
 
 void bar_init(struct bar *bar, GtkApplication *app) {
-	GdkMonitor *mon = gdk_display_get_primary_monitor(gdk_display_get_default());
+	GdkDisplay *disp = gdk_display_get_default();
+	GdkMonitor *mon = NULL;
+	if (bar->monitor == NULL) {
+		mon = gdk_display_get_primary_monitor(disp);
+	} else {
+		int nmons = gdk_display_get_n_monitors(disp);
+		for (int i = 0; i < nmons; ++i) {
+			GdkMonitor *m = gdk_display_get_monitor(disp, i);
+			const char *model = gdk_monitor_get_model(m);
+			if (strcmp(bar->monitor, model) == 0) {
+				mon = m;
+				break;
+			}
+		}
+	}
+
+	if (mon == NULL) {
+		err("Monitor not found.");
+		exit(EXIT_FAILURE);
+	}
+
 	GdkRectangle geometry;
 	gdk_monitor_get_geometry(mon, &geometry);
 	int scale = gdk_monitor_get_scale_factor(mon);
