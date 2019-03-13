@@ -1,4 +1,4 @@
-PKGS = dbus-1
+PKGS = dbus-1 libpulse
 CFLAGS += $(shell pkg-config --cflags $(PKGS)) -I. -Wall -Wextra -Wno-main -Wno-unused-parameter
 LDFLAGS += $(shell pkg-config --libs $(PKGS))
 

@@ -9,7 +9,8 @@ struct prov {
 #define providers() \
 	X(prov_processor) \
 	X(prov_i3workspaces) \
-	X(prov_wireless)
+	X(prov_wireless) \
+	X(prov_audio)
 
 #define X(x) extern struct prov x;
 providers()
