@@ -11,7 +11,7 @@ class Audio extends ModComponent {
 
 		let proc = new IPCProc("webbar-stats audio", msg => {
 			let [ name, desc, vol, muted ] = msg.split(":");
-			this.state.sinks[name] = { desc, vol, muted: muted == 1 };
+			this.state.sinks[name] = { desc, vol, muted: muted == "1" };
 			this.setState({ sinks: this.state.sinks });
 		});
 	}
