@@ -13,6 +13,44 @@ class Launcher extends ModComponent {
 	}
 }
 
+class Tray extends ModComponent {
+	render(props, state) {
+		let className = state.opened ? "open" : "closed";
+		if (state.opened) {
+			return this.el({ className },
+				props.children,
+				h("div", {
+					className: "tray-toggle clickable",
+					onClick: () => this.setState({ opened: false }) }));
+		} else {
+			return this.el({ className },
+				h("div", {
+					className: "tray-toggle clickable",
+					onClick: () => this.setState({ opened: true }) }));
+		}
+	}
+
+	css() {
+		return `
+		module.Tray {
+			transition: width 0.2s;
+			padding: 0px;
+		}
+		module.Tray > .tray-toggle {
+			cursor: pointer;
+			width: 32px;
+			text-align: center;
+			outline: 1px solid #aaa;
+		}
+		module.Tray.closed > .tray-toggle::after {
+			content: "◂";
+		}
+		module.Tray.open > .tray-toggle::after {
+			content: "✕";
+		}`;
+	}
+}
+
 class Audio extends ModComponent {
 	componentDidMount() {
 		this.state.sinks = {};
