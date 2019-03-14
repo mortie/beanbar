@@ -36,12 +36,12 @@ class LoadingWidget extends WidgetComponent {
 }
 
 class SliderWidget extends WidgetComponent {
-	change(evt, cb) {
-		evt.preventDefault();
-
-		let e = evt;
+	onMouse(evt, cb) {
 		if (cb == null)
 			return;
+
+		evt.preventDefault();
+		let e = evt;
 
 		if (evt.type == "mousemove" && evt.buttons != 1)
 			return;
@@ -83,18 +83,18 @@ class SliderWidget extends WidgetComponent {
 
 	render(props, state) {
 		let percent = ((props.val - props.min) / (props.max - props.min)) * 100;
+		let text = props.text != null ? props.text : props.val.toFixed(0);
 		return this.el(null,
 			h("div", {
 				className: "outer",
-				onClick: evt => this.change(evt, props.change),
-				onMouseMove: evt => this.change(evt, props.change),
-				onTouchMove: evt => this.change(evt, props.change),
-				onWheel: evt => this.onWheel(evt, props.change) },
+				onClick: evt => this.onMouse(evt, props.onChange),
+				onMouseMove: evt => this.onMouse(evt, props.onChange),
+				onTouchMove: evt => this.onMouse(evt, props.onChange),
+				onWheel: evt => this.onWheel(evt, props.onChange) },
 				h("div", {
 					className: "inner",
 					style: `width: ${percent}%` }),
-				h("div", { className: "info" },
-					`${props.val.toFixed(0)}`)));
+				h("div", { className: "info" }, text)));
 	}
 
 	css() {
@@ -103,7 +103,6 @@ class SliderWidget extends WidgetComponent {
 			width: 100px;
 			height: 100%;
 			position: relative;
-			background: #eee;
 			border-radius: 4px;
 			box-shadow: 0 4px 5px rgba(0, 0, 0, 0.25) inset;
 		}
@@ -112,6 +111,7 @@ class SliderWidget extends WidgetComponent {
 			border-radius: 4px;
 			background: #75b6cc;
 			height: 100%;
+			max-width: 100%;
 		}
 
 		widget.SliderWidget .info {

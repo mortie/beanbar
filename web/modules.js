@@ -24,8 +24,11 @@ class Audio extends ModComponent {
 		for (let key of Object.keys(state.sinks)) {
 			let sink = state.sinks[key];
 			let className = "";
+			let icon = sink.muted ? "🔇" : "🔊";
+			let text = `${icon} ${sink.vol}%`;
 			if (sink.muted) className += "muted ";
-			els.push(h("div", { className }, sink.vol+"%"));
+			els.push(h("div", { className },
+				h(SliderWidget, { val: parseInt(sink.vol), text })));
 		}
 
 		return this.el(null, `Vol: `, els);
@@ -33,8 +36,8 @@ class Audio extends ModComponent {
 
 	css() {
 		return `
-		module.Audio div.muted {
-			color: darkred;
+		module.Audio div.muted widget.SliderWidget .inner {
+			background-color: #cc8b75;
 		}
 		module.Network div:not(:last-child):after {
 			content: ", ";
