@@ -103,12 +103,11 @@ class SliderWidget extends WidgetComponent {
 			width: 100px;
 			height: 100%;
 			position: relative;
-			border-radius: 4px;
+			background-color: #ccc;
 			box-shadow: 0 4px 5px rgba(0, 0, 0, 0.25) inset;
 		}
 
 		widget.SliderWidget .inner {
-			border-radius: 4px;
 			background: #75b6cc;
 			height: 100%;
 			max-width: 100%;

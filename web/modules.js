@@ -78,11 +78,15 @@ class Audio extends ModComponent {
 				h(SliderWidget, { val: parseInt(sink.vol), text })));
 		}
 
-		return this.el(null, `Vol: `, els);
+		let className = els.length != 0 ? "filled" : "";
+		return this.el({ className }, `Vol: `, els);
 	}
 
 	css() {
 		return `
+		module.Audio.filled {
+			padding-right: 0px;
+		}
 		module.Audio div.muted widget.SliderWidget .inner {
 			display: none;
 		}
