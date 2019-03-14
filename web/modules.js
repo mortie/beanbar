@@ -4,6 +4,15 @@ class Label extends ModComponent {
 	}
 };
 
+class Launcher extends ModComponent {
+	render(props, state) {
+		return this.el({
+			className: "clickable",
+			onClick: () => new IPCProc(props.cmd) },
+			props.text || props.cmd);
+	}
+}
+
 class Audio extends ModComponent {
 	componentDidMount() {
 		this.state.sinks = {};
