@@ -5,7 +5,7 @@ cat <<EOF
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>WebBar</title>
+		<title>Beanbar</title>
 		<style>
 $(cat style.css)
 		</style>

@@ -72,7 +72,7 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 		tmpf[0] = '\0';
 		tmpfd = -1;
 	} else {
-		strcpy(tmpf, "/tmp/webbar.XXXXXX");
+		strcpy(tmpf, "/tmp/beanbar.XXXXXX");
 		tmpfd = mkstemp(tmpf);
 		if (tmpfd < 0) {
 			perror("mkstemp");

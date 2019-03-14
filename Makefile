@@ -6,13 +6,13 @@ PREFIX ?= /usr/local
 DESTDIR ?=
 
 .PHONY: all
-all: webbar webbar-stats/webbar-stats
+all: beanbar beanbar-stats/beanbar-stats
 
-webbar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o
+beanbar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
-webbar-stats/webbar-stats:
-	$(MAKE) -C webbar-stats webbar-stats
+beanbar-stats/beanbar-stats:
+	$(MAKE) -C beanbar-stats beanbar-stats
 
 obj/%.o: src/%.c src/*.h
 	@mkdir -p $(@D)
@@ -27,12 +27,12 @@ obj/web.html: $(shell find web -type f)
 	./web/index.html.sh > "$@"
 
 .PHONY: install
-install: webbar
+install: beanbar
 	install -d $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 webbar $(DESTDIR)$(PREFIX)/bin
-	$(MAKE) -C webbar-stats install
+	install -m 0755 beanbar $(DESTDIR)$(PREFIX)/bin
+	$(MAKE) -C beanbar-stats install
 
 .PHONY: clean
 clean:
-	rm -rf webbar obj
-	$(MAKE) -C webbar-stats clean
+	rm -rf beanbar obj
+	$(MAKE) -C beanbar-stats clean

@@ -35,7 +35,7 @@ static void read_rc() {
 	char *defaultconf = NULL;
 
 	if (opts.config == NULL) {
-		char *conffile = "webbar.js";
+		char *conffile = "beanbar.js";
 		const char *confdir = g_get_user_config_dir();
 		size_t conflen = strlen(confdir) + 1 + strlen(conffile);
 		defaultconf = g_malloc(conflen + 1);
@@ -144,7 +144,7 @@ int main (int argc, char **argv) {
 		{ 0 },
 	};
 
-	app = gtk_application_new("coffee.mort.webbar", G_APPLICATION_NON_UNIQUE);
+	app = gtk_application_new("coffee.mort.beanbar", G_APPLICATION_NON_UNIQUE);
 	g_application_add_main_option_entries(G_APPLICATION(app), optents);
 
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);

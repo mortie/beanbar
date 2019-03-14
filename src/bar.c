@@ -68,7 +68,7 @@ void bar_init(struct bar *bar, GtkApplication *app) {
 	int scale = gdk_monitor_get_scale_factor(mon);
 
 	bar->win = gtk_application_window_new(app);
-	gtk_window_set_title(GTK_WINDOW(bar->win), "WebBar");
+	gtk_window_set_title(GTK_WINDOW(bar->win), "Beanbar");
 	gtk_window_set_decorated(GTK_WINDOW(bar->win), FALSE);
 	gtk_window_set_default_size(GTK_WINDOW(bar->win), geometry.width, bar->bar_height);
 	gtk_window_move(GTK_WINDOW(bar->win), geometry.x, geometry.y + geometry.height - bar->bar_height);

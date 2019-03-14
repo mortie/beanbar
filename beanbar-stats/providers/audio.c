@@ -57,7 +57,7 @@ static int main(int argc, char **argv) {
 	pa_mainloop_api *mainloop_api = pa_mainloop_get_api(m);
 	pa_signal_init(mainloop_api);
 
-	pa_context *ctx = pa_context_new(mainloop_api, "webbar-stats");
+	pa_context *ctx = pa_context_new(mainloop_api, "beanbar-stats");
 	if (ctx == NULL) {
 		fprintf(stderr, "pa_context_new() failed.\n");
 		return EXIT_FAILURE;

@@ -9,7 +9,7 @@ SRC = $(wildcard src/*.c providers/*.c)
 HDR = $(wildcard src/*.h providers/*.h)
 OBJ = $(patsubst %.c,obj/%.o,$(SRC))
 
-webbar-stats: $(OBJ)
+beanbar-stats: $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 obj/%.o: %.c $(HDR)
@@ -17,11 +17,11 @@ obj/%.o: %.c $(HDR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 .PHONY: install
-install: webbar-stats
+install: beanbar-stats
 	install -d $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 webbar-stats $(DESTDIR)$(PREFIX)/bin
+	install -m 0755 beanbar-stats $(DESTDIR)$(PREFIX)/bin
 
 .PHONY: clean
 clean:
 	rm -rf obj
-	rm -f webbar-stats
+	rm -f beanbar-stats

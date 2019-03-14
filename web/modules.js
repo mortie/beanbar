@@ -9,7 +9,7 @@ class Audio extends ModComponent {
 		this.state.sinks = {};
 		this.setState();
 
-		let proc = new IPCProc("webbar-stats audio", msg => {
+		let proc = new IPCProc("beanbar-stats audio", msg => {
 			let [ name, desc, vol, muted ] = msg.split(":");
 			this.state.sinks[name] = { desc, vol, muted: muted == "1" };
 			this.setState({ sinks: this.state.sinks });
@@ -90,7 +90,7 @@ class Network extends ModComponent {
 		this.state.connections = {};
 		this.setState();
 
-		let proc = new IPCProc("webbar-stats network", msg => {
+		let proc = new IPCProc("beanbar-stats network", msg => {
 			let [ path, state, name ] = msg.split(":");
 
 			if (state == "DISCONNECTED" || state == "DISCONNECTING") {
@@ -158,7 +158,7 @@ class Processor extends ModComponent {
 	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
-		let proc = new IPCProc("webbar-stats processor", msg =>
+		let proc = new IPCProc("beanbar-stats processor", msg =>
 			this.setState({ percent: msg }));
 
 		onUpdate(() => proc.send());
@@ -209,7 +209,7 @@ class I3Workspaces extends ModComponent {
 		done
 		`, msg => {});
 
-		let proc = new IPCProc("webbar-stats i3workspaces", this.onMsg.bind(this));
+		let proc = new IPCProc("beanbar-stats i3workspaces", this.onMsg.bind(this));
 
 		if (this.props.scroll) {
 			let scrollLim = 150;
