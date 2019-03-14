@@ -37,7 +37,7 @@ class Audio extends ModComponent {
 	css() {
 		return `
 		module.Audio div.muted widget.SliderWidget .inner {
-			background-color: #cc8b75;
+			display: none;
 		}
 		module.Network div:not(:last-child):after {
 			content: ", ";
