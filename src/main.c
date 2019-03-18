@@ -82,12 +82,10 @@ static void activate(GtkApplication *app, gpointer data) {
 	else
 		bar.location = LOCATION_BOTTOM;
 	bar.monitor = opts.monitor;
+	bar.debug = opts.debug;
 
 	read_rc();
 	bar_init(&bar, app);
-
-	if (opts.debug)
-		bar_show_debug(&bar);
 }
 
 static int in_cleanup = 0;
