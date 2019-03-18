@@ -41,18 +41,25 @@ static void uri_handler_config(WebKitURISchemeRequest *req, gpointer data) {
 	g_object_unref(stream);
 }
 
-static void create_win(struct bar *bar, struct bar_win *win) {
+static void create_win(struct bar *bar, struct bar_win *win, GdkMonitor *mon) {
+	g_object_ref(mon);
+	win->mon = mon;
+
+	GdkRectangle geometry;
+	gdk_monitor_get_geometry(mon, &geometry);
+	int scale = gdk_monitor_get_scale_factor(mon);
+
 	win->win = gtk_application_window_new(bar->app);
 	gtk_window_set_title(GTK_WINDOW(win->win), "Beanbar");
 	gtk_window_set_decorated(GTK_WINDOW(win->win), FALSE);
+	gtk_window_set_default_size(GTK_WINDOW(win->win), geometry.width, bar->bar_height);
 
 	// Create WebKitGTK
 	win->webview = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
 	WebKitSettings *settings = webkit_web_view_get_settings(win->webview);
 	webkit_settings_set_enable_write_console_messages_to_stdout(settings, TRUE);
-	if (bar->debug)
-		g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
+	g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
 
 	WebKitWebContext *webctx = webkit_web_view_get_context(win->webview);
 	webkit_web_context_register_uri_scheme(
@@ -69,19 +76,11 @@ static void create_win(struct bar *bar, struct bar_win *win) {
 	gtk_widget_grab_focus(GTK_WIDGET(win->webview));
 	gtk_widget_show_all(win->win);
 
-	// Make the window a dock
 	GdkWindow *gdkwin = gtk_widget_get_window(win->win);
+
+	// Make the window a dock
 	set_prop_atom(gdkwin, "_NET_WM_WINDOW_TYPE", "_NET_WM_WINDOW_TYPE_DOCK");
 	set_prop_atom(gdkwin, "_NET_WM_WINDOW_STATE", "_NET_WM_STATE_ABOVE");
-}
-
-static void update_win(struct bar *bar, struct bar_win *win, GdkMonitor *mon) {
-	g_object_ref(mon);
-	win->mon = mon;
-	GdkRectangle geometry;
-	gdk_monitor_get_geometry(mon, &geometry);
-	int scale = gdk_monitor_get_scale_factor(mon);
-	GdkWindow *gdkwin = gtk_widget_get_window(win->win);
 
 	// Move/resize window
 	gtk_window_move(GTK_WINDOW(win->win), geometry.x, geometry.y + geometry.height - bar->bar_height);
@@ -131,8 +130,7 @@ void on_monitor_added(GdkDisplay *display, GdkMonitor *mon, gpointer data) {
 		bar->wins = realloc(bar->wins, bar->wins_size * sizeof(*bar->wins));
 	}
 
-	create_win(bar, &bar->wins[bar->wins_len]);
-	update_win(bar, &bar->wins[bar->wins_len], mon);
+	create_win(bar, &bar->wins[bar->wins_len], mon);
 	bar->wins_len += 1;
 }
 
@@ -175,8 +173,7 @@ static void init_static(struct bar *bar) {
 	bar->wins_size = 4;
 	bar->wins_len = 1;
 	bar->wins = malloc(bar->wins_size * sizeof(*bar->wins));
-	create_win(bar, &bar->wins[0]);
-	update_win(bar, &bar->wins[0], mon);
+	create_win(bar, &bar->wins[0], mon);
 }
 
 static void init_dynamic(struct bar *bar) {
@@ -189,8 +186,7 @@ static void init_dynamic(struct bar *bar) {
 
 	for (int i = 0; i < nmons; ++i) {
 		GdkMonitor *m = gdk_display_get_monitor(disp, i);
-		create_win(bar, &bar->wins[i]);
-		update_win(bar, &bar->wins[i], m);
+		create_win(bar, &bar->wins[i], m);
 	}
 
 	g_signal_connect(disp, "monitor-added", G_CALLBACK(on_monitor_added), bar);
