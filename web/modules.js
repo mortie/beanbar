@@ -18,7 +18,7 @@ class Tray extends ModComponent {
 		let className = state.opened ? "open" : "closed";
 		if (state.opened) {
 			return this.el({ className },
-				props.children,
+				h("group", { className: "children" }, props.children),
 				h("div", {
 					className: "tray-toggle clickable",
 					onClick: () => this.setState({ opened: false }) }));
@@ -33,12 +33,16 @@ class Tray extends ModComponent {
 	css() {
 		return `
 		module.Tray {
-			transition: width 0.2s;
+			position: relative;
 			padding: 0px;
+		}
+		module.Tray > .children {
+			position: absolute;
+			right: var(--min-width);
 		}
 		module.Tray > .tray-toggle {
 			cursor: pointer;
-			width: 32px;
+			width: var(--min-width);
 			text-align: center;
 			outline: 1px solid var(--col-outline);
 		}
