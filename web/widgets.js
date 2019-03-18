@@ -21,7 +21,7 @@ class LoadingWidget extends WidgetComponent {
 			margin: 1px;
 			border-radius: 50%;
 			border: 3px solid;
-			border-color: #000 transparent #000 transparent;
+			border-color: var(--col-fg) transparent var(--col-fg) transparent;
 			animation: LoadingWidget 1.2s linear infinite;
 		}
 		@keyframes LoadingWidget {
@@ -103,12 +103,12 @@ class SliderWidget extends WidgetComponent {
 			width: 100px;
 			height: 100%;
 			position: relative;
-			background-color: #ccc;
+			background-color: var(--col-bg-3);
 			box-shadow: 0 4px 5px rgba(0, 0, 0, 0.25) inset;
 		}
 
 		widget.SliderWidget .inner {
-			background: #75b6cc;
+			background: var(--col-nice-1);
 			height: 100%;
 			max-width: 100%;
 		}

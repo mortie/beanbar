@@ -1,3 +1,21 @@
+:root {
+	--col-bg-1: #fff;
+	--col-bg-2: #eee;
+	--col-bg-3: #ccc;
+	--col-fg: #000;
+
+	--col-outline: #aaa;
+	--col-highlight: darkred;
+
+	--col-nice-1: #75b6cc;
+	--col-nice-2: #b675cc;
+	--col-nice-3: #cc8b75;
+	--col-nice-4: #8bcc75;
+
+	--padding: 8px;
+	--min-width: 32px;
+}
+
 * {
 	box-sizing: border-box;
 	-webkit-user-select: none;
@@ -10,6 +28,8 @@ html, body {
 	width: 100%;
 	overflow: hidden;
 	margin: 0px;
+	color: var(--col-fg);
+	background: var(--col-bg-1);
 }
 
 group {
@@ -21,13 +41,13 @@ group {
 module {
 	display: flex;
 	justify-content: space-between;
-	outline: 1px solid #aaa;
-	padding: 0px 8px;
-	background: #eee;
+	outline: 1px solid var(--col-outline);
+	padding: 0px var(--padding);
+	background: var(--col-bg-2);
 	white-space: pre;
 }
 
 .clickable {
-	background: #ccc;
+	background: var(--col-bg-3);
 	cursor: pointer;
 }

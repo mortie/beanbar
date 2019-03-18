@@ -40,7 +40,7 @@ class Tray extends ModComponent {
 			cursor: pointer;
 			width: 32px;
 			text-align: center;
-			outline: 1px solid #aaa;
+			outline: 1px solid var(--col-outline);
 		}
 		module.Tray.closed > .tray-toggle::after {
 			content: "◂";
@@ -403,15 +403,15 @@ class I3Workspaces extends ModComponent {
 		}
 		module.I3Workspaces .mode {
 			padding: 0px 8px;
-			color: darkred;
+			color: var(--col-highlight);
 		}
 		module.I3Workspaces .workspace {
 			display: inline-block;
 			position: relative;
 			padding: 0px 4px;
-			min-width: 32px;
+			min-width: var(--min-width);
 			text-align: center;
-			background: #bbb;
+			background: var(--col-bg-3);
 		}
 		module.I3Workspaces .workspace.urgent {
 			color: red;
@@ -420,23 +420,23 @@ class I3Workspaces extends ModComponent {
 		module.I3Workspaces .workspace.focused::after {
 			position: absolute;
 			content: " ";
-			background: darkred;
+			background: var(--col-highlight);
 			width: 100%;
 			height: 3px;
 			left: 0px;
 			bottom: 0px;
 		}
 		module.I3Workspaces .workspace.visible.mon-0 {
-			background: #75b6cc;
+			background: var(--col-nice-1);
 		}
 		module.I3Workspaces .workspace.visible.mon-1 {
-			background: #b675cc;
+			background: var(--col-nice-2);
 		}
 		module.I3Workspaces .workspace.visible.mon-2 {
-			background: #cc8b75;
+			background: var(--col-nice-3);
 		}
 		module.I3Workspaces .workspace.visible.mon-3 {
-			background: #8bcc75;
+			background: var(--col-nice-4);
 		}`;
 	}
 }
