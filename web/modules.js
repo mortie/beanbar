@@ -93,9 +93,6 @@ class Audio extends ModComponent {
 		}
 		module.Audio div.muted widget.SliderWidget .inner {
 			display: none;
-		}
-		module.Network div:not(:last-child):after {
-			content: ", ";
 		}`;
 	}
 }
