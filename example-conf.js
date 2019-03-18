@@ -2,6 +2,8 @@ config({
 	updateTime: 2000,
 });
 
+css(THEME_DARK);
+
 init(
 	h(I3Workspaces, { scroll: true }),
 	h("group", null,

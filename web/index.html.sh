@@ -17,6 +17,7 @@ $(cat lib.js)
 $(cat ctx.js)
 $(cat widgets.js)
 $(cat modules.js)
+$(cat themes.js)
 		</script>
 		<script src="config:"></script>
 	</body>
