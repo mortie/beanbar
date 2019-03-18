@@ -14,6 +14,8 @@
 
 	--padding: 8px;
 	--min-width: 32px;
+	--font-size: 15px;
+	--font-family: "Sans";
 }
 
 * {
@@ -25,11 +27,15 @@
 
 html, body {
 	height: 100%;
-	width: 100%;
+}
+
+body {
 	overflow: hidden;
 	margin: 0px;
 	color: var(--col-fg);
 	background: var(--col-bg-1);
+	font-size: var(--font-size);
+	font-family: var(--font-family);
 }
 
 group {
