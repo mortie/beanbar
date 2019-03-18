@@ -20,7 +20,7 @@ struct opts {
 };
 
 static struct opts opts = {
-	.height = 32,
+	.height = 26,
 	.debug = FALSE,
 	.debug_print = FALSE,
 	.top = FALSE,
