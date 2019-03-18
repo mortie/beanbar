@@ -151,7 +151,7 @@ void on_monitor_removed(GdkDisplay *display, GdkMonitor *mon, gpointer data) {
 static void init_static(struct bar *bar) {
 	GdkDisplay *disp = gdk_display_get_default();
 	GdkMonitor *mon = NULL;
-	if (strcmp(bar->monitor, "primary")) {
+	if (strcmp(bar->monitor, "primary") == 0) {
 		mon = gdk_display_get_primary_monitor(disp);
 	} else {
 		int nmons = gdk_display_get_n_monitors(disp);
