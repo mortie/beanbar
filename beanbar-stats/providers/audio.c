@@ -14,19 +14,24 @@ static void sink_info_callback(
 
 	double volume = (double)pa_cvolume_avg(&(i->volume)) / (double)PA_VOLUME_NORM;
 	int percent = round(volume * 100.0);
-	ipc_sendf("%s:%s:%i:%i", i->name, i->description, percent, i->mute);
+	ipc_sendf("change:%i:%s:%i:%i", i->index, i->description, percent, i->mute);
 }
 
 static void subscribe_callback(
 		pa_context *ctx, pa_subscription_event_type_t type, uint32_t idx, void *data) {
 
-	type &= PA_SUBSCRIPTION_EVENT_FACILITY_MASK;
-	if (type != PA_SUBSCRIPTION_EVENT_SINK) {
-		fprintf(stderr, "Unexpected event type: %i\n", type);
-		return;
-	}
+	int facility = type & PA_SUBSCRIPTION_EVENT_FACILITY_MASK;
+	int operation = type & PA_SUBSCRIPTION_EVENT_TYPE_MASK;
 
-	pa_context_get_sink_info_by_index(ctx, idx, sink_info_callback, NULL);
+	if (
+			facility == PA_SUBSCRIPTION_EVENT_SINK &&
+			operation == PA_SUBSCRIPTION_EVENT_CHANGE) {
+		pa_context_get_sink_info_by_index(ctx, idx, sink_info_callback, NULL);
+	} else if (
+			facility == PA_SUBSCRIPTION_EVENT_CARD &&
+			operation == PA_SUBSCRIPTION_EVENT_REMOVE) {
+		ipc_sendf("remove:%i", idx);
+	}
 }
 
 void state_callback(pa_context *ctx, void *data) {
@@ -43,7 +48,8 @@ void state_callback(pa_context *ctx, void *data) {
 
 	case PA_CONTEXT_READY:
 		pa_context_set_subscribe_callback(ctx, subscribe_callback, NULL);
-		pa_context_subscribe(ctx, PA_SUBSCRIPTION_MASK_SINK, NULL, NULL);
+		pa_context_subscribe(
+			ctx, PA_SUBSCRIPTION_MASK_SINK | PA_SUBSCRIPTION_MASK_CARD, NULL, NULL);
 
 		pa_context_get_sink_info_list(ctx, sink_info_callback, NULL);
 		break;

@@ -15,6 +15,7 @@ struct opts {
 	gboolean debug;
 	gboolean debug_print;
 	gboolean top;
+	gboolean replace;
 	gchar *config;
 	gchar *monitor;
 };
@@ -72,8 +73,14 @@ static void read_rc() {
 	g_free(defaultconf);
 }
 
+static void kill_existing() {
+}
+
 static void activate(GtkApplication *app, gpointer data) {
 	log_debug = opts.debug || opts.debug_print;
+
+	if (opts.replace)
+		kill_existing();
 
 	bar.bar_height = opts.height;
 	bar.rc = "init(h(Label, { text: 'Missing config file.' }));";
@@ -132,6 +139,9 @@ int main (int argc, char **argv) {
 		}, {
 			"top", 't', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.top,
 			"Place the bar on top", NULL,
+		}, {
+			"replace", 'r', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.replace,
+			"Replace a existing beanbar instances", NULL,
 		}, {
 			"config", 'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_FILENAME, &opts.config,
 			"The config file", NULL,

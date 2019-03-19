@@ -61,8 +61,15 @@ class Audio extends ModComponent {
 		this.setState();
 
 		let proc = new IPCProc("beanbar-stats audio", msg => {
-			let [ name, desc, vol, muted ] = msg.split(":");
-			this.state.sinks[name] = { desc, vol, muted: muted == "1" };
+			let parts = msg.split(":");
+			let evt = parts[0];
+			if (evt == "change") {
+				let [ evt, id, desc, vol, muted ] = parts;
+				this.state.sinks[id] = { desc, vol, muted: muted == "1" };
+			} else if (evt == "remove") {
+				let [ evt, id ] = parts;
+				delete this.state.sinks[id];
+			}
 			this.setState({ sinks: this.state.sinks });
 		});
 	}
@@ -78,7 +85,7 @@ class Audio extends ModComponent {
 			let icon = sink.muted ? "🔇" : "🔊";
 			let text = `${icon} ${sink.vol}%`;
 			if (sink.muted) className += "muted ";
-			els.push(h("div", { className },
+			els.push(h("div", { className, title: sink.desc },
 				h(SliderWidget, { val: parseInt(sink.vol), text })));
 		}
 
