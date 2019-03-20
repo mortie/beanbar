@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
@@ -23,7 +25,6 @@ struct opts {
 static struct opts opts = {
 	.height = 26,
 	.debug = FALSE,
-	.debug_print = FALSE,
 	.top = FALSE,
 	.config = NULL,
 	.monitor = NULL,
@@ -74,13 +75,51 @@ static void read_rc() {
 }
 
 static void kill_existing() {
+	pid_t selfpid = getpid();
+
+	char selfpath[1024];
+	ssize_t len;
+	if ((len = readlink("/proc/self/exe", selfpath, sizeof(selfpath)) - 1) < 0) {
+		perror("/proc/self/exe");
+		return;
+	}
+	selfpath[len + 1] = '\0';
+
+	DIR *dir = opendir("/proc");
+	struct dirent *ent;
+	while ((ent = readdir(dir)) != NULL) {
+		int pid = atoi(ent->d_name);
+		if (pid == 0) continue;
+		if (pid == selfpid) continue;
+
+		char exepath[64];
+		snprintf(exepath, sizeof(exepath), "/proc/%i/exe", pid);
+
+		char progpath[1024];
+		if ((len = readlink(exepath, progpath, sizeof(progpath) - 1)) < 0) {
+			if (errno != ENOENT && errno != EACCES) {
+				perror(exepath);
+			}
+			continue;
+		}
+		progpath[len] = '\0';
+
+		char *ignore = " (deleted)";
+		if ((size_t)len > strlen(ignore)) {
+			char *end = progpath + len - strlen(ignore);
+			if (strcmp(end, ignore) == 0)
+				progpath[len - strlen(ignore)] = '\0';
+		}
+
+		if (strcmp(selfpath, progpath) == 0) {
+			debug("Waiting for beanbar %i to die...", pid);
+			kill(pid, SIGTERM);
+		}
+	}
 }
 
 static void activate(GtkApplication *app, gpointer data) {
-	log_debug = opts.debug || opts.debug_print;
-
-	if (opts.replace)
-		kill_existing();
+	log_debug = opts.debug;
 
 	bar.bar_height = opts.height;
 	bar.rc = "init(h(Label, { text: 'Missing config file.' }));";
@@ -90,6 +129,9 @@ static void activate(GtkApplication *app, gpointer data) {
 		bar.location = LOCATION_BOTTOM;
 	bar.monitor = opts.monitor;
 	bar.debug = opts.debug;
+
+	if (opts.replace)
+		kill_existing();
 
 	read_rc();
 	bar_init(&bar, app);
@@ -132,9 +174,6 @@ int main (int argc, char **argv) {
 			"The height of the bar", NULL,
 		}, {
 			"debug", 'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug,
-			"Enable debugging, including inspector and debug prints", NULL,
-		}, {
-			"debug-print", 'p', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.debug_print,
 			"Enable debug prints", NULL,
 		}, {
 			"top", 't', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &opts.top,
