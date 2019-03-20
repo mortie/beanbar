@@ -283,9 +283,22 @@ class I3Workspaces extends ModComponent {
 			let recentThresh = 100;
 			let acc = 0;
 			let recent = false;
+			let touchMoved = false;
 			let clearTO = null;
+
+			document.body.addEventListener("touchmove", () => touchMoved = true);
+			document.body.addEventListener("touchend", () => touchMoved = true);
+
 			document.body.addEventListener("wheel", evt => {
-				if (clearTO) clearTimeout(clearTO);
+				if (touchMoved) {
+					acc = 0;
+					touchMoved = false;
+					return;
+				}
+
+				if (clearTO)
+					clearTimeout(clearTO);
+
 				clearTO = setTimeout(() => {
 					acc = 0;
 					recent = false;
