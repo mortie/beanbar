@@ -54,28 +54,10 @@ static void create_win(struct bar *bar, struct bar_win *win, GdkMonitor *mon) {
 	gtk_window_set_decorated(GTK_WINDOW(win->win), FALSE);
 	gtk_window_set_default_size(GTK_WINDOW(win->win), geometry.width, bar->bar_height);
 
-	// Create WebKitGTK
-	win->webview = WEBKIT_WEB_VIEW(webkit_web_view_new());
-
-	WebKitSettings *settings = webkit_web_view_get_settings(win->webview);
-	webkit_settings_set_enable_write_console_messages_to_stdout(settings, TRUE);
-	g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
-
-	WebKitWebContext *webctx = webkit_web_view_get_context(win->webview);
-	webkit_web_context_register_uri_scheme(
-		webctx, "builtin", uri_handler_builtin, bar, NULL);
-	webkit_web_context_register_uri_scheme(
-		webctx, "config", uri_handler_config, bar, NULL);
-
-	// Create IPC thing
-	ipc_init(&win->ipc, win->webview);
-
-	// Show
-	webkit_web_view_load_uri(win->webview, "builtin:");
-	gtk_container_add(GTK_CONTAINER(win->win), GTK_WIDGET(win->webview));
-	gtk_widget_grab_focus(GTK_WIDGET(win->webview));
+	// We want to change gdk stuff _before_ starting webkitgtk,
+	// because window managers seem to get confused if it takes too long time
+	// from we create the window to we set the props
 	gtk_widget_show_all(win->win);
-
 	GdkWindow *gdkwin = gtk_widget_get_window(win->win);
 
 	// Make the window a dock
@@ -113,6 +95,28 @@ static void create_win(struct bar *bar, struct bar_win *win, GdkMonitor *mon) {
 		geometry.width * scale, bar->bar_height * scale,
 	};
 	set_prop_cardinal(gdkwin, "_NET_WM_OPAQUE_REGION", (const void *)opaque_region, 4);
+
+	// Create WebKitGTK
+	win->webview = WEBKIT_WEB_VIEW(webkit_web_view_new());
+	WebKitSettings *settings = webkit_web_view_get_settings(win->webview);
+	WebKitWebContext *webctx = webkit_web_view_get_context(win->webview);
+
+	// Configure WebKitGTK
+	webkit_settings_set_enable_write_console_messages_to_stdout(settings, TRUE);
+	g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
+	webkit_web_context_register_uri_scheme(
+		webctx, "builtin", uri_handler_builtin, bar, NULL);
+	webkit_web_context_register_uri_scheme(
+		webctx, "config", uri_handler_config, bar, NULL);
+
+	// Create IPC thing
+	ipc_init(&win->ipc, win->webview);
+
+	// Show WebKitGTK
+	webkit_web_view_load_uri(win->webview, "builtin:");
+	gtk_container_add(GTK_CONTAINER(win->win), GTK_WIDGET(win->webview));
+	gtk_widget_grab_focus(GTK_WIDGET(win->webview));
+	gtk_widget_show_all(GTK_WIDGET(win->webview));
 }
 
 static void destroy_win(struct bar *bar, struct bar_win *win) {
