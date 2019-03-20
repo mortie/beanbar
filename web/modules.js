@@ -358,7 +358,7 @@ class I3Workspaces extends ModComponent {
 				if (ws.visible)
 					this.state.visible[ws.output] = ws.num;
 			});
-			this.setState(this.state);
+			this.setState();
 		} else if (type == "0x80000000") {
 			if (data.change == "focus") {
 				if (data.old) {
@@ -368,13 +368,13 @@ class I3Workspaces extends ModComponent {
 				this.state.workspaces[data.current.num].urgent = false;
 				this.state.workspaces[data.current.num].focused = true;
 				this.state.visible[data.current.output] = data.current.num;
-				this.setState(this.state);
+				this.setState();
 			} else if (data.change == "empty") {
 				delete this.state.workspaces[data.current.num];
-				this.setState(this.state);
+				this.setState();
 			} else if (data.change == "urgent") {
 				this.state.workspaces[data.current.num].urgent = data.current.urgent;
-				this.setState(this.state);
+				this.setState();
 			}
 		} else if (type == "0x80000002") {
 			this.setState({ mode: data.change });
