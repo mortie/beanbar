@@ -65,10 +65,11 @@ class SliderWidget extends WidgetComponent {
 	}
 
 	onWheel(evt, cb) {
-		evt.stopPropagation();
-
 		if (cb == null)
 			return;
+
+		evt.preventDefault();
+		evt.stopPropagation();
 
 		let delta = evt.deltaY / 300;
 		let scale = this.props.max - this.props.min;
