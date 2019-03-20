@@ -51,7 +51,6 @@ static DBusMessage *prop_get(
 		conn, msg, 1000, &err);
 	dbus_message_unref(msg);
 	if (dbus_error_is_set(&err)) {
-		fprintf(stderr, "property get error: %s\n", err.message);
 		dbus_error_free(&err);
 		return NULL;
 	}
@@ -102,6 +101,9 @@ static void send_active(DBusConnection *conn) {
 		char *type = prop_get_string(
 			conn, "org.freedesktop.NetworkManager", path,
 			"org.freedesktop.NetworkManager.Connection.Active", "Type");
+		if (type == NULL)
+			continue;
+
 		if (!is_valid_type(type)) {
 			dbus_message_iter_next(&subsub);
 			continue;
@@ -110,6 +112,9 @@ static void send_active(DBusConnection *conn) {
 		char *name = prop_get_string(
 			conn, "org.freedesktop.NetworkManager", path,
 			"org.freedesktop.NetworkManager.Connection.Active", "Id");
+		if (name == NULL)
+			continue;
+
 		ipc_sendf("%s:%s:%s", path, states[STATE_CONNECTED], name);
 		dbus_message_iter_next(&subsub);
 	}
@@ -130,10 +135,8 @@ static void handle_state_changed(DBusConnection *conn, DBusMessage *msg) {
 
 	uint32_t val;
 	dbus_message_iter_get_basic(&args, &val);
-	if (val >= states_len) {
-		fprintf(stderr, "Invalid state: %i\n", val);
+	if (val >= states_len)
 		return;
-	}
 
 	if (val == STATE_DISCONNECTED) {
 		ipc_sendf("%s:%s:", dbus_message_get_path(msg), states[val]);
@@ -153,11 +156,19 @@ static void handle_state_changed(DBusConnection *conn, DBusMessage *msg) {
 	ipc_sendf("%s:%s:%s", dbus_message_get_path(msg), states[val], name);
 }
 
+static void handle_device_removed(DBusConnection *conn, DBusMessage *msg) {
+	ipc_send("reset");
+	send_active(conn);
+}
+
 static DBusHandlerResult filter (
 		DBusConnection *conn, DBusMessage *msg, void *data) {
 
-	if (strcmp(dbus_message_get_member(msg), "StateChanged") == 0)
+	const char *member = dbus_message_get_member(msg);
+	if (strcmp(member, "StateChanged") == 0)
 		handle_state_changed(conn, msg);
+	else if (strcmp(member, "DeviceRemoved") == 0)
+		handle_device_removed(conn, msg);
 
 	return DBUS_HANDLER_RESULT_HANDLED;
 }
@@ -175,8 +186,16 @@ static int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-	const char *rule = "type='signal',interface='org.freedesktop.NetworkManager.Connection.Active'";
-	dbus_bus_add_match(conn, rule, &err);
+	const char *rule1 = "type='signal',interface='org.freedesktop.NetworkManager.Connection.Active'";
+	dbus_bus_add_match(conn, rule1, &err);
+	if (dbus_error_is_set(&err)) {
+		fprintf(stderr, "DBus add match error: %s\n", err.message);
+		dbus_error_init(&err);
+		return EXIT_FAILURE;
+	}
+
+	const char *rule2 = "type='signal',interface='org.freedesktop.NetworkManager'";
+	dbus_bus_add_match(conn, rule2, &err);
 	if (dbus_error_is_set(&err)) {
 		fprintf(stderr, "DBus add match error: %s\n", err.message);
 		dbus_error_init(&err);

@@ -153,13 +153,17 @@ class Network extends ModComponent {
 		this.setState();
 
 		let proc = new IPCProc("beanbar-stats network", msg => {
-			let [ path, state, name ] = msg.split(":");
-
-			if (state == "DISCONNECTED" || state == "DISCONNECTING") {
-				if (this.state.connections[path])
-					delete this.state.connections[path];
+			if (msg == "reset") {
+				this.state.connections = {};
 			} else {
-				this.state.connections[path] = { name, state };
+				let [ path, state, name ] = msg.split(":");
+
+				if (state == "DISCONNECTED" || state == "DISCONNECTING") {
+					if (this.state.connections[path])
+						delete this.state.connections[path];
+				} else {
+					this.state.connections[path] = { name, state };
+				}
 			}
 
 			this.setState();
