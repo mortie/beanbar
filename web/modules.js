@@ -109,7 +109,7 @@ class Disk extends ModComponent {
 		let proc = new IPCProc(IPC_EXEC_SH, `
 		read -r mount
 		while read; do
-			df -h "$mount" | awk '{print $4}'
+			df -h "$mount" | grep -v "Avail" | awk '{print $4}'
 		done
 		`, msg => this.setState({ avail: msg }));
 		proc.send(this.props.mount);
