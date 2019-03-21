@@ -11,44 +11,45 @@ static char hexchar(char c) {
 }
 
 char *json_escape_string(const char *input, size_t inputlen, size_t *outputlen) {
+	const unsigned char *in = (const unsigned char *)input;
 	size_t allocd = (inputlen * 1.3) + 8;
 	*outputlen = 0;
-	char *output = g_malloc(allocd);
+	unsigned char *output = g_malloc(allocd);
 
 	output[(*outputlen)++] = '"';
 
-	while (*input) {
+	while (*in) {
 		while (allocd <= *outputlen + 8) {
 			debug("reallocing, consider tuning escape_string. (%zi -> %zi, %zi)", allocd, allocd * 2, inputlen);
 			allocd *= 2;
 			output = g_realloc(output, allocd);
 		}
 
-		if (*input == '\\') {
+		if (*in == '\\') {
 			output[(*outputlen)++] = '\\';
 			output[(*outputlen)++] = '\\';
-		} else if (*input == '"') {
+		} else if (*in == '"') {
 			output[(*outputlen)++] = '\\';
 			output[(*outputlen)++] = '"';
-		} else if (*input == '\n') {
+		} else if (*in == '\n') {
 			output[(*outputlen)++] = '\\';
 			output[(*outputlen)++] = 'n';
-		} else if (*input < 0x20) {
+		} else if (*in < 0x20) {
 			output[(*outputlen)++] = '\\';
 			output[(*outputlen)++] = 'u';
 			output[(*outputlen)++] = '0';
 			output[(*outputlen)++] = '0';
-			output[(*outputlen)++] = hexchar((*input & 0xf0) >> 4);
-			output[(*outputlen)++] = hexchar(*input & 0x0f);
+			output[(*outputlen)++] = hexchar((*in & 0xf0) >> 4);
+			output[(*outputlen)++] = hexchar(*in & 0x0f);
 		} else {
-			output[(*outputlen)++] = *input;
+			output[(*outputlen)++] = *in;
 		}
 
-		input += 1;
+		in += 1;
 	}
 
 	output[(*outputlen)++] = '"';
 	output[(*outputlen)++] = '\0';
 
-	return output;
+	return (char *)output;
 }
