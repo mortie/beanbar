@@ -14,19 +14,45 @@ class Launcher extends ModComponent {
 }
 
 class Tray extends ModComponent {
+	constructor() {
+		super();
+		this.timeout = null;
+	}
+
+	keepOpen() {
+		if (this.props.timeout != -1) {
+			if (this.timeout != null)
+				clearTimeout(this.timeout);
+			this.timeout = setTimeout(() => this.close(), this.props.timeout);
+		}
+	}
+
+	open() {
+		this.setState({ opened: true });
+		this.keepOpen();
+	}
+
+	close() {
+		this.setState({ opened: false });
+		if (this.timeout) {
+			clearTimeout(this.timeout);
+			this.timeout = null;
+		}
+	}
+
 	render(props, state) {
 		let className = state.opened ? "open" : "closed";
 		if (state.opened) {
-			return this.el({ className },
+			return this.el({ className, onClick: this.keepOpen.bind(this) },
 				h("group", { className: "children" }, props.children),
 				h("div", {
 					className: "tray-toggle clickable",
-					onClick: () => this.setState({ opened: false }) }));
+					onClick: () => this.close() }));
 		} else {
 			return this.el({ className },
 				h("div", {
 					className: "tray-toggle clickable",
-					onClick: () => this.setState({ opened: true }) }));
+					onClick: () => this.open() }));
 		}
 	}
 
@@ -54,6 +80,7 @@ class Tray extends ModComponent {
 		}`;
 	}
 }
+Tray.defaultProps = { timeout: 10000 };
 
 class Audio extends ModComponent {
 	componentDidMount() {
