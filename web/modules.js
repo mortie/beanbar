@@ -170,9 +170,22 @@ class Battery extends ModComponent {
 		if (state.percent == null)
 			return;
 
+		let className = state.percent < props.low ? "low" : "";
+
+		return this.el(null,
+			h("span", null, "Bat: "),
+			h("span", { className }, `${state.percent}%`));
 		return this.el(null, `Bat: ${state.percent}%`);
 	}
+
+	css() {
+		return `
+		module.Battery .low {
+			color: var(--col-urgent);
+		}`
+	}
 }
+Battery.defaultProps = { low: 15 };
 
 class Network extends ModComponent {
 	componentDidMount() {
@@ -466,7 +479,7 @@ class I3Workspaces extends ModComponent {
 			background: var(--col-bg-3);
 		}
 		module.I3Workspaces .workspace.urgent {
-			color: red;
+			color: var(--col-urgent);
 			font-weight: bold;
 		}
 		module.I3Workspaces .workspace.focused::after {
