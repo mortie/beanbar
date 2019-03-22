@@ -170,7 +170,7 @@ class Battery extends ModComponent {
 		if (state.percent == null)
 			return;
 
-		let className = state.percent < props.low ? "low" : "";
+		let className = state.percent <= props.low ? "low" : "";
 
 		return this.el(null,
 			h("span", null, "Bat: "),
