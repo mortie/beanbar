@@ -13,7 +13,7 @@ class Launcher extends ModComponent {
 	}
 }
 
-class Tray extends ModComponent {
+class Drawer extends ModComponent {
 	constructor() {
 		super();
 		this.timeout = null;
@@ -58,29 +58,29 @@ class Tray extends ModComponent {
 
 	css() {
 		return `
-		module.Tray {
+		module.Drawer {
 			position: relative;
 			padding: 0px;
 		}
-		module.Tray > .children {
+		module.Drawer > .children {
 			position: absolute;
 			right: var(--min-width);
 		}
-		module.Tray > .tray-toggle {
+		module.Drawer > .tray-toggle {
 			cursor: pointer;
 			width: var(--min-width);
 			text-align: center;
 			outline: 1px solid var(--col-outline);
 		}
-		module.Tray.closed > .tray-toggle::after {
+		module.Drawer.closed > .tray-toggle::after {
 			content: "◂";
 		}
-		module.Tray.open > .tray-toggle::after {
+		module.Drawer.open > .tray-toggle::after {
 			content: "✕";
 		}`;
 	}
 }
-Tray.defaultProps = { timeout: 10000 };
+Drawer.defaultProps = { timeout: 10000 };
 
 class Audio extends ModComponent {
 	componentDidMount() {

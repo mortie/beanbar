@@ -14,7 +14,7 @@ init(
 		h(Memory),
 		h(Processor),
 		h(Time),
-		h(Tray, null,
+		h(Drawer, null,
 			h(Launcher, { text: "Firefox", cmd: "blueman-manager" }),
 			h(Launcher, { text: "Bluetooth", cmd: "blueman-manager" }),
 		),
