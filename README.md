@@ -4,6 +4,20 @@ Beanbar is a status bar application based on web technologies running WebKitGTK.
 
 ![](https://raw.githubusercontent.com/mortie/beanbar/master/img/screenshot.png)
 
+<!-- toc -->
+
+- [Installation](#installation)
+- [Goals](#goals)
+- [A web browser in my status bar? Really?](#a-web-browser-in-my-status-bar-really)
+- [Configuration](#configuration)
+  * [init(...modules)](#initmodules)
+  * [config(obj)](#configobj)
+  * [css(string)](#cssstring)
+  * [await include(src)](#await-includesrc)
+- [Known bugs/issues](#known-bugsissues)
+
+<!-- tocstop -->
+
 ## Installation
 
 To build Beanbar and install it to /usr/local/bin,

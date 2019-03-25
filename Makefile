@@ -36,3 +36,7 @@ install: beanbar
 clean:
 	rm -rf beanbar obj
 	$(MAKE) -C beanbar-stats clean
+
+.PHONY: readme-toc
+readme-toc:
+	markdown-toc -i README.md
