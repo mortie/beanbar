@@ -95,7 +95,7 @@ The main functions you will use are:
 This function should generally come last, as it depends on state set by the
 config and css functions.
 
-`init();` is the most important function; it's where you configure what modules
+`init` is the most important function; it's where you configure what modules
 to use. Its arguments are the return value of the `h` function, which you can
 read about in
 [Preact's documentation](https://preactjs.com/guide/api-reference).
