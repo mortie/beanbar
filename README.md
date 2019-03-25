@@ -15,6 +15,10 @@ Beanbar is a status bar application based on web technologies running WebKitGTK.
   * [css(string)](#cssstring)
   * [await include(src)](#await-includesrc)
 - [Known bugs/issues](#known-bugsissues)
+- [Making your own module](#making-your-own-module)
+  * [The ModComponent class](#the-modcomponent-class)
+  * [The onUpdate function](#the-onupdate-function)
+  * [The IPCProc class](#the-ipcproc-class)
 
 <!-- tocstop -->
 
@@ -156,3 +160,81 @@ can `await` the promise from the top level.
 * Some options such as the bar's height/location and what monitor it appears on,
   are needed before any javascript is loaded, and can therefore only be
   provided on the command line, not through the config javascript file.
+
+## Making your own module
+
+You should read through a couple of
+[the built-in modules](https://github.com/mortie/beanbar/blob/master/web/modules.js)
+to get a feel for how modules work.
+
+### The ModComponent class
+
+Each module is a sub-class of the ModComponent class, which is a sub-class of
+the main Preact Component class. You should read up on how Preact components
+work: https://preactjs.com/guide/api-reference
+
+While you're free to add a build step and use a transpiler to get the pretty
+JSX syntax, I personally find that it's way more trouble than it's worth for
+this use case. I would probably suggest just sticking to the `h` function.
+
+Here's what the ModComponent class adds on top of the default Preact Component
+class:
+
+* Your render function should return `this.el(props, ...children)` instead of
+  `h(tag, props, ...children)`. Using the `el` function ensures you're
+  followingr the convention; each module is a `module` tag with the JavaScript
+  class name as the CSS class name.
+* If you implement the `css()` function, you can return a CSS string which will
+  be added to the document the first time your class is instantiated.
+* If you call the `consistentWidth()` method from the `componentDidUpdate()`
+  method, the module will try to have a somewhat consistent width. This is
+  useful for components which would otherwise jump between different widths a
+  lot, such as the built-in `Processor` module.
+
+### The onUpdate function
+
+`onUpdate(cb)` is a function which just takes a callback function, and calls it
+whenever the component should update. How frequently it's called is determined
+by the `updateTime` config option.
+
+### The IPCProc class
+
+`new IPCProc(head, body, cb)` lets you spawn a process which can get information about, or make
+modifications to, the system. With this class, you can spawn a child process,
+write to its stdin, and get notified whenever it writes to its stdout.
+
+It's conventional for scripts to wait until they receive a line from stdin,
+then print a line to stdout.
+
+The `head` parameter is a shell one-liner which runs your script, `body`
+is the content of your script, and `cb` is a function which gets called when
+the child process prints a line. Note that `body` is massaged to remove extra
+indentation, meaning Python works fine.
+
+Most of the time, you want to use the predefined variables `IPC_EXEC_SH` and
+`IPC_EXEC_PYTHON`, and not write your own `head` command, but it's pretty
+simple; the C part of Beanbar will essentially run
+`sh -c "$head"`, with the `TMPFILE` environment variable set to a path which
+contains `body`. `IPC_EXEC_SH` is, at the time of writing, literally just
+`'sh "$TMPFILE"'`.
+
+Here's an example which will print `"Hello <incrementing number>"` every now and then:
+
+``` JavaScript
+let proc = new IPCProc(IPC_EXEC_SH, `
+	i=0
+	while read; do
+		echo "$i"
+		i=$(($i + 1))
+	done
+	`, msg => console.log(msg));
+
+// proc.send(line) sends a line to the process' stdin,
+// and 'line' defaults to an empty line
+onUpdate(() => proc.send());
+```
+
+IPCProc's `body` parameter can be omitted, in which case no temp file will be
+created. This is useful if the process is just a shell one-liner, or maybe a
+program which is bade for the purpose of providing data to Beanbar, such as the
+`beanbar-stats` program.
