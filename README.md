@@ -182,7 +182,7 @@ class:
 
 * Your render function should return `this.el(props, ...children)` instead of
   `h(tag, props, ...children)`. Using the `el` function ensures you're
-  followingr the convention; each module is a `module` tag with the JavaScript
+  following the convention; each module is a `module` tag with the JavaScript
   class name as the CSS class name.
 * If you implement the `css()` function, you can return a CSS string which will
   be added to the document the first time your class is instantiated.
