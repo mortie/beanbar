@@ -1,3 +1,18 @@
+class Group extends ModComponent {
+	render(props, state) {
+		return this.el(null, props.children);
+	}
+
+	css() {
+		return `
+		module.Group {
+			padding: initial;
+			background: initial;
+			outline: initial;
+		}`;
+	}
+}
+
 class Label extends ModComponent {
 	render(props, state) {
 		return this.el(null, props.text);

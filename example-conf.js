@@ -6,7 +6,7 @@ css(THEME_DARK);
 
 init(
 	h(I3Workspaces, { scroll: true }),
-	h("group", null,
+	h(Group, null,
 		h(Audio),
 		h(Disk),
 		h(Network),

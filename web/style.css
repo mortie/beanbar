@@ -39,12 +39,6 @@ body {
 	font-family: var(--font-family);
 }
 
-group {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-}
-
 module {
 	display: flex;
 	justify-content: space-between;
@@ -52,6 +46,19 @@ module {
 	padding: 0px var(--padding);
 	background: var(--col-bg-2);
 	white-space: pre;
+}
+
+#bar {
+	display: grid;
+}
+#bar > * {
+	justify-self: center;
+}
+#bar > *:last-child {
+	justify-self: end;
+}
+#bar > *:first-child {
+	justify-self: start;
 }
 
 .clickable {

@@ -32,13 +32,15 @@ window.config = function config(c) {
 	}
 };
 
-let style = "";
+let cssStr = "";
 window.css = function css(str) {
-	style += str;
+	cssStr += str;
 }
 
 window.init = function init(...modules) {
-	render(h('group', null, ...modules), document.body);
+	let len = modules.length;
+	let style = `grid-template-columns: repeat(${len}, 1fr);`;
+	render(h("div", { id: "bar", style }, ...modules), document.body);
 
 	document.body.addEventListener("resize", () =>
 		document.body.style.lineHeight = document.body.clientHeight+"px");
@@ -47,10 +49,10 @@ window.init = function init(...modules) {
 	triggerUpdate();
 	setInterval(triggerUpdate, conf.updateTime);
 
-	if (style != "") {
+	if (cssStr != "") {
 		let sheet = document.createElement("style");
 		sheet.type = "text/css";
-		sheet.innerHTML = style;
+		sheet.innerText = cssStr;
 		document.getElementsByTagName("head")[0].appendChild(sheet);
 	}
 };
