@@ -74,6 +74,7 @@ where additional assets can be loaded from.
 
 The current list of built-in modules is:
 
+* `h(Group, null, ...)`: Group elements together.
 * `h(Label, { text })`: Just arbitrary text.
 * `h(Launcher, { cmd, text })`: A launcher, which runs `cmd` when clicked.
 * `h(Drawer, { timeout }, ...)`: A drawer which expands to display its children
@@ -87,6 +88,21 @@ The current list of built-in modules is:
 * `h(Time, { func })`: Show the current time.
 * `h(I3Workspaces, { scroll })`: Show workspaces from i3wm. If `scroll` is
   true, scrolling on the bar will change workspace.
+
+Here's a tiny example config file. It would put an I3Workspaces module on the
+left, a Time module in the middle, and a Disk and Network module grouped up to
+the right.
+
+``` JavaScript
+init(
+	h(I3Workspaces, { scroll: true }),
+	h(Time),
+	h(Group, null,
+		h(Disk, { mount: "/" }),
+		h(Network)
+	),
+);
+```
 
 The main functions you will use are:
 
