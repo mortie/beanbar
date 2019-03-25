@@ -61,7 +61,7 @@ using web technologies is probably the easiest and arguably best way to achieve
 the hackability goal.
 
 I haven't used a computer with less than 16GB of RAM for quite a while, so I'm
-not exactl starved for RAM.
+not exactly starved for RAM.
 
 ## Configuration
 
