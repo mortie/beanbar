@@ -59,7 +59,7 @@ class Drawer extends ModComponent {
 		let className = state.opened ? "open" : "closed";
 		if (state.opened) {
 			return this.el({ className, onClick: this.keepOpen.bind(this) },
-				h("group", { className: "children" }, props.children),
+				h(Group, null, props.children),
 				h("div", {
 					className: "tray-toggle clickable",
 					onClick: () => this.close() }));
@@ -77,7 +77,7 @@ class Drawer extends ModComponent {
 			position: relative;
 			padding: 0px;
 		}
-		module.Drawer > .children {
+		module.Drawer > module.Group {
 			position: absolute;
 			right: var(--min-width);
 		}
