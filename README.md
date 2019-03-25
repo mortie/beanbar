@@ -55,8 +55,8 @@ The config file defaults to `$XDG_CONFIG_HOME/beanbar/beanbar.js`
 (or `~/.config/beanbar/beanbar.js`). For an example config file, see
 [example-conf.js](https://github.com/mortie/beanbar/blob/master/example-conf.js).
 
-The `$XDG_CONFIG_HOME/beanbar` directory acts as a web root where additional
-assets can be loaded from.
+The directory which the config file is in cts as a web root,
+where additional assets can be loaded from.
 
 The current list of built-in modules is:
 
