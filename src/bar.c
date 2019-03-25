@@ -80,7 +80,7 @@ static void uri_handler_local(WebKitURISchemeRequest *req, gpointer data) {
 	if (stream == NULL)
 		return;
 
-	debug("Got request to local:%s (%s)", url, mime);
+	debug("Request: local:%s (%s)", url, mime);
 	webkit_uri_scheme_request_finish(req, stream, size, mime);
 	g_object_unref(stream);
 }
