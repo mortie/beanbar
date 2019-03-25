@@ -11,6 +11,15 @@ window.triggerUpdate = function triggerUpdate() {
 	updateListeners.forEach(cb => cb());
 }
 
+window.include = function include(path) {
+	return new Promise(resolve => {
+		let script = document.createElement("script");
+		script.src = path;
+		script.onload = resolve;
+		document.getElementsByTagName("head")[0].appendChild(script);
+	});
+}
+
 let conf = {
 	updateTime: 5000,
 };

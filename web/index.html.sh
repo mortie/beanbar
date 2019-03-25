@@ -18,8 +18,13 @@ $(cat ctx.js)
 $(cat widgets.js)
 $(cat modules.js)
 $(cat themes.js)
+
+fetch("local:conf").then(res => res.text()).then(js => {
+	let script = document.createElement("script");
+	script.text = "(async function() {" + js + "})();";
+	document.getElementsByTagName("head")[0].appendChild(script);
+});
 		</script>
-		<script src="config:"></script>
 	</body>
 </html>
 EOF

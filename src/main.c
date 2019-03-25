@@ -37,7 +37,7 @@ static void read_rc() {
 	char *defaultconf = NULL;
 
 	if (opts.config == NULL) {
-		char *conffile = "beanbar.js";
+		char *conffile = "beanbar/beanbar.js";
 		const char *confdir = g_get_user_config_dir();
 		size_t conflen = strlen(confdir) + 1 + strlen(conffile);
 		defaultconf = g_malloc(conflen + 1);
@@ -57,20 +57,9 @@ static void read_rc() {
 		exit(EXIT_FAILURE);
 	}
 
-	FILE *f = fopen(config, "r");
-	if (f == NULL) {
-		perror(opts.config);
-		exit(EXIT_FAILURE);
-	}
-
-	bar.rc = g_malloc(st.st_size + 1);
-	fread(bar.rc, 1, st.st_size, f);
-	if (ferror(f)) {
-		perror(config);
-		exit(EXIT_FAILURE);
-	}
-	bar.rc[st.st_size] = '\0';
-
+	bar.rcfile = malloc(strlen(config) + 1);
+	strcpy(bar.rcfile, config);
+	bar.rcdir = g_path_get_dirname(config);
 	g_free(defaultconf);
 }
 
@@ -122,13 +111,14 @@ static void activate(GtkApplication *app, gpointer data) {
 	log_debug = opts.debug;
 
 	bar.bar_height = opts.height;
-	bar.rc = "init(h(Label, { text: 'Missing config file.' }));";
 	if (opts.top)
 		bar.location = LOCATION_TOP;
 	else
 		bar.location = LOCATION_BOTTOM;
 	bar.monitor = opts.monitor;
 	bar.debug = opts.debug;
+	bar.rcfile = NULL;
+	bar.rcdir = NULL;
 
 	if (opts.replace)
 		kill_existing();

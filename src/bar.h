@@ -16,7 +16,8 @@ struct bar_win {
 struct bar {
 	int bar_height;
 	enum { LOCATION_TOP, LOCATION_BOTTOM } location;
-	char *rc;
+	char *rcfile;
+	char *rcdir;
 	char *monitor;
 	int debug;
 
