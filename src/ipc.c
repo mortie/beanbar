@@ -66,20 +66,22 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 		return;
 	}
 
-	char tmpf[32];
 	int tmpfd;
+	char *tmpf;
 	if (body == NULL) {
-		tmpf[0] = '\0';
+		tmpf = NULL;
 		tmpfd = -1;
 	} else {
-		strcpy(tmpf, "/tmp/beanbar.XXXXXX");
-		tmpfd = mkstemp(tmpf);
-		if (tmpfd < 0) {
-			perror("mkstemp");
+		GError *err = NULL;
+		tmpfd = g_file_open_tmp("beanbar.XXXXXX", &tmpf, &err);
+		if (err != NULL) {
+			fprintf(stderr, "g_file_open_tmp: %s\n", err->message);
+			g_error_free(err);
 			return;
 		}
 		if (write(tmpfd, body, strlen(body)) < 0) {
 			perror("write");
+			free(tmpf);
 			return;
 		}
 	}
@@ -125,7 +127,7 @@ static void handle_exec(struct ipc *ipc, int id, char *msg) {
 		ent->infd = infd[1];
 		ent->outfd = outfd[0];
 		ent->tmpfd = tmpfd;
-		strcpy(ent->tmpf, tmpf);
+		ent->tmpf = tmpf;
 		struct epoll_event ev = { 0 };
 		ev.events = EPOLLIN;
 		ev.data.fd = ent->outfd;
@@ -248,6 +250,7 @@ static void *message_pump(void *data) {
 				if (ent->tmpfd >= 0) {
 					close(ent->tmpfd);
 					unlink(ent->tmpf);
+					free(ent->tmpf);
 				}
 				if (epoll_ctl(ipc->epollfd, EPOLL_CTL_DEL, ev->data.fd, NULL) < 0)
 					perror("epoll_ctl");
@@ -309,6 +312,7 @@ void ipc_free(struct ipc *ipc) {
 		waitpid(ent->pid, NULL, 0);
 		close(ent->tmpfd);
 		unlink(ent->tmpf);
+		free(ent->tmpf);
 	}
 	free(ipc->exec_ents);
 }

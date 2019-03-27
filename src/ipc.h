@@ -12,7 +12,7 @@ struct ipc_exec_ent {
 	int infd;
 	int outfd;
 	int tmpfd;
-	char tmpf[32];
+	char *tmpf;
 };
 
 struct ipc {
