@@ -166,6 +166,8 @@ static void create_win(struct bar *bar, struct bar_win *win, GdkMonitor *mon) {
 
 static void destroy_win(struct bar *bar, struct bar_win *win) {
 	gtk_widget_destroy(win->win);
+	g_object_unref(win->webview);
+	g_object_unref(win->win);
 	g_object_unref(win->mon);
 	ipc_free(&win->ipc);
 }
@@ -255,6 +257,7 @@ void bar_free(struct bar *bar) {
 	for (size_t i = 0; i < bar->wins_len; ++i) {
 		ipc_free(&bar->wins[i].ipc);
 	}
+	free(bar->wins);
 }
 
 void bar_trigger_update(struct bar *bar) {

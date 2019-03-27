@@ -30,7 +30,7 @@ static struct opts opts = {
 	.monitor = NULL,
 };
 
-static struct bar bar;
+static struct bar bar = { 0 };
 
 static void read_rc() {
 	char *config = opts.config;
@@ -130,12 +130,11 @@ static void activate(GtkApplication *app, gpointer data) {
 static int in_cleanup = 0;
 static gboolean cleanup(gpointer data) {
 	if (in_cleanup) {
+		fprintf(stderr, "Force shutdown.\n");
 		exit(EXIT_FAILURE);
 	} else {
 		in_cleanup = 1;
-		debug("shutdown.");
-		bar_free(&bar);
-		exit(EXIT_FAILURE);
+		g_application_quit(G_APPLICATION(bar.app));
 	}
 	return TRUE;
 }
@@ -146,7 +145,9 @@ static gboolean trigger_update(gpointer data) {
 }
 
 static void shutdown(GtkApplication *app, gpointer data) {
-	cleanup(0);
+	bar_free(&bar);
+	free(bar.rcfile);
+	free(bar.rcdir);
 }
 
 int main (int argc, char **argv) {
