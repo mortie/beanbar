@@ -9,14 +9,14 @@ DESTDIR ?=
 all: beanbar beanbar-stats/beanbar-stats
 
 beanbar: obj/main.o obj/bar.o obj/ipc.o obj/json.o obj/web.html.o
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 beanbar-stats/beanbar-stats:
 	$(MAKE) -C beanbar-stats beanbar-stats
 
 obj/%.o: src/%.c src/*.h
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 obj/web.html.o: obj/web.html
 	@mkdir -p $(@D)
@@ -31,6 +31,11 @@ install: beanbar
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 beanbar $(DESTDIR)$(PREFIX)/bin
 	$(MAKE) -C beanbar-stats install
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/beanbar
+	$(MAKE) -C beanbar-stats uninstall
 
 .PHONY: clean
 clean:

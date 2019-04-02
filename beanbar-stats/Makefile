@@ -10,16 +10,20 @@ HDR = $(wildcard src/*.h providers/*.h)
 OBJ = $(patsubst %.c,obj/%.o,$(SRC))
 
 beanbar-stats: $(OBJ)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 obj/%.o: %.c $(HDR)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 .PHONY: install
 install: beanbar-stats
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 beanbar-stats $(DESTDIR)$(PREFIX)/bin
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/beanbar-stats
 
 .PHONY: clean
 clean:
