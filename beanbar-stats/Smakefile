@@ -1,0 +1,5 @@
+TARGET = beanbar-stats
+PKGS = libpulse dbus-1
+CCOPTS += -I.
+LDOPTS += -lm
+WARNINGS += -Wno-main
