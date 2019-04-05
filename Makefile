@@ -83,10 +83,12 @@ install: $(BUILD)/$(TARGET)
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f $^ $(DESTDIR)$(PREFIX)/bin
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	$(MAKE) -C beanbar-stats install
 
 .PHONY: uninstall
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	$(MAKE) -C beanbar-stats uninstall
 
 .PHONY: clean
 clean:
