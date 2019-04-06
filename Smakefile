@@ -1,6 +1,6 @@
 TARGET = beanbar
 PKGS = gtk+-3.0 webkit2gtk-4.0
-SMAKEDEPS = beanbar-stats
+DEPENDS = beanbar-stats
 
 LDOPTS += -lpthread
 OBJS += $(BUILD)/obj/web.html.o
