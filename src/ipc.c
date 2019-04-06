@@ -300,7 +300,10 @@ void ipc_init(struct ipc *ipc, WebKitWebView *view) {
 
 void ipc_free(struct ipc *ipc) {
 	char buf[] = "";
-	write(ipc->msgpump_pipe[1], buf, sizeof(buf));
+	if (write(ipc->msgpump_pipe[1], buf, sizeof(buf)) < 0) {
+		perror("write");
+	}
+
 	void *retval;
 	pthread_join(ipc->msgthread, &retval);
 

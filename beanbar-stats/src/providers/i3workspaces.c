@@ -57,8 +57,16 @@ static int main(int argc, char **argv) {
 	}
 
 	char sockpath[256];
-	fscanf(f, "%255s\n", sockpath);
-	fgets(sockpath, sizeof(sockpath) - 1, f);
+	int ret;
+	if ((ret = fscanf(f, "%255s\n", sockpath)) != 1) {
+		fprintf(stderr, "fscanf returned %i, expected 1\n", ret);
+		abort();
+	}
+
+	if (fgets(sockpath, sizeof(sockpath) - 1, f) == NULL) {
+		fprintf(stderr, "fgets failed\n");
+		abort();
+	}
 	pclose(f);
 
 	struct sockaddr_un addr;

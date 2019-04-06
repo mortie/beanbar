@@ -11,24 +11,33 @@ struct snapshot {
 	int idle;
 };
 
-void read_snapshot(struct snapshot *snap) {
+int read_snapshot(struct snapshot *snap) {
 	FILE *f = fopen("/proc/stat", "r");
 	int vals[7];
-	fscanf(f, "cpu  %i %i %i %i %i %i %i",
+	int ret = fscanf(f, "cpu  %i %i %i %i %i %i %i",
 		vals, vals + 1, vals + 2, vals + 3, vals + 4, vals + 5, vals + 6);
+	if (ret != 7) {
+		fprintf(stderr, "fscanf returned %i, expected 7\n", ret);
+		fclose(f);
+		return -1;
+	}
+
 	snap->idle = vals[3];
 	snap->total = vals[0] + vals[1] + vals[2] + vals[3] + vals[4] + vals[5] + vals[6];
 	fclose(f);
+	return 0;
 }
 
 static int main(int argc, char **argv) {
 	(void)argc; (void)argv;
 
 	struct snapshot prev;
-	read_snapshot(&prev);
+	if (read_snapshot(&prev) < 0)
+		abort();
 	while (ipc_loop()) {
 		struct snapshot now;
-		read_snapshot(&now);
+		if (read_snapshot(&now) < 0)
+			continue;
 
 		double deltatotal = now.total - prev.total;
 		double deltaidle = now.idle - prev.idle;
