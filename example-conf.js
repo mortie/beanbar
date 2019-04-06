@@ -5,7 +5,7 @@ config({
 css(THEME_DARK);
 
 init(
-	h(I3Workspaces, { scroll: true }),
+	h(Group, null, h(I3Workspaces, { scroll: true })),
 	h(Group, null,
 		h(Audio),
 		h(Disk),
