@@ -171,12 +171,20 @@ Disk.defaultProps = { mount: "/" };
 class Battery extends ModComponent {
 	componentDidMount() {
 		let proc = this.ipcProc(IPC_EXEC_SH, `
-		full="$(cat /sys/class/power_supply/BAT0/charge_full)"
+		read -r bat
+		path="/sys/class/power_supply/$bat"
+		full="$(cat "$path/charge_full")"
 		while read; do
-			now="$(cat /sys/class/power_supply/BAT0/charge_now)"
-			echo "($now / $full) * 100" | bc -l
+			now="$(cat "$path/charge_now")"
+			state="$(cat "$path/status")"
+			echo "$state:$(echo "($now / $full) * 100" | bc -l)"
 		done
-		`, msg => this.setState({ percent: Math.round(parseFloat(msg)) }));
+		`, msg => {
+			let state = msg.split(":")[0];
+			let percent = Math.round(parseFloat(msg.split(":")[1]));
+			this.setState({ state, percent });
+		});
+		proc.send(this.props.battery);
 
 		onUpdate(() => proc.send());
 	}
@@ -185,7 +193,8 @@ class Battery extends ModComponent {
 		if (state.percent == null)
 			return;
 
-		let className = state.percent <= props.low ? "low" : "";
+		let className = state.state.toLowerCase();
+		if (state.percent <= props.low) className += " low";
 
 		return this.el(null,
 			h("span", null, "Bat: "),
@@ -197,10 +206,13 @@ class Battery extends ModComponent {
 		return `
 		module.Battery .low {
 			color: var(--col-urgent);
-		}`
+		}
+		module.Battery .low.charging {
+			color: var(--col-warning);
+		}`;
 	}
 }
-Battery.defaultProps = { low: 15 };
+Battery.defaultProps = { low: 15, battery: "BAT0" };
 
 class Network extends ModComponent {
 	componentDidMount() {
