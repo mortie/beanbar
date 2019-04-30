@@ -1,4 +1,4 @@
-TARGET = beanbar-stats
+PROJNAME = beanbar-stats
 PKGS = libpulse dbus-1
 CCOPTS += -I.
 LDOPTS += -lm
