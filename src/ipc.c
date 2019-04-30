@@ -159,6 +159,30 @@ static void handle_write(struct ipc *ipc, int id, char *msg) {
 	}
 }
 
+static void handle_kill(struct ipc *ipc, int id) {
+	// We don't actually modify any state, just kill the process
+	// and let the message pump handle the rest
+
+	size_t idx;
+	for (idx = 0; idx < ipc->exec_ents_len; ++idx)
+		if (ipc->exec_ents[idx].id == id) break;
+	if (idx == ipc->exec_ents_len) {
+		warn("ent id doesn't exist: %i", id);
+		return;
+	}
+
+	struct ipc_exec_ent *ent = ipc->exec_ents + idx;
+	if (!ent->active) {
+		warn("ent not active: %i", id);
+		return;
+	}
+
+	if (kill(ent->pid, SIGTERM) < 0) {
+		perror("kill");
+		return;
+	}
+}
+
 static void on_msg(
 		WebKitUserContentManager *manager, WebKitJavascriptResult *jsresult,
 		gpointer data) {
@@ -176,12 +200,6 @@ static void on_msg(
 		return;
 	}
 
-	JSCValue *valmsg = jsc_value_object_get_property(val, "msg");
-	if (valmsg == NULL) {
-		warn("IPC expected object with a `msg` property.");
-		return;
-	}
-
 	JSCValue *valtype = jsc_value_object_get_property(val, "type");
 	if (valtype == NULL) {
 		warn("IPC expected object with a `type` property.");
@@ -189,17 +207,33 @@ static void on_msg(
 	}
 
 	char *type = jsc_value_to_string(valtype);
-	char *msg = jsc_value_to_string(valmsg);
 
 	if (strcmp(type, "exec") == 0) {
+		JSCValue *valmsg = jsc_value_object_get_property(val, "msg");
+		if (valmsg == NULL) {
+			warn("IPC 'exec' expected a 'msg' property.");
+			return;
+		}
+
+		char *msg = jsc_value_to_string(valmsg);
 		handle_exec(ipc, (int)jsc_value_to_double(valid), msg);
+		g_free(msg);
 	} else if (strcmp(type, "write") == 0) {
+		JSCValue *valmsg = jsc_value_object_get_property(val, "msg");
+		if (valmsg == NULL) {
+			warn("IPC 'write' expected a 'msg' property.");
+			return;
+		}
+
+		char *msg = jsc_value_to_string(valmsg);
 		handle_write(ipc, (int)jsc_value_to_double(valid), msg);
+		g_free(msg);
+	} else if (strcmp(type, "kill") == 0) {
+		handle_kill(ipc, (int)jsc_value_to_double(valid));
 	} else {
 		warn("Unknown IPC message type: %s", type);
 	}
 
-	g_free(msg);
 	g_free(type);
 	webkit_javascript_result_unref(jsresult);
 }

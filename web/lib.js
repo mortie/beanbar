@@ -9,6 +9,7 @@ let modulesWithCss = {};
 class Comp extends Component {
 	constructor() {
 		super();
+		this.procs = [];
 		this.width = 0;
 		this.widthTime = -1;
 		let id = this.id();
@@ -28,6 +29,12 @@ class Comp extends Component {
 		return h(this.htmlTag(), props, ...args);
 	}
 
+	ipcProc(head, body, cb) {
+		let p = new IPCProc(head, body, cb);
+		this.procs.push(p);
+		return p;
+	}
+
 	consistentWidth() {
 		let thresh = 1 * 60 * 1000;
 		let now = new Date().getTime();
@@ -44,6 +51,10 @@ class Comp extends Component {
 			this.base.style.minWidth = this.width+"px";
 			this.widthTime = now;
 		}
+	}
+
+	componentWillUnmount() {
+		this.procs.forEach(p => p.kill());
 	}
 
 	id() {
@@ -143,6 +154,13 @@ window.IPCProc = class IPCProc {
 			type: "write",
 			id: this.id,
 			msg: msg+"\n",
+		});
+	}
+
+	kill() {
+		window.webkit.messageHandlers.ipc.postMessage({
+			type: "kill",
+			id: this.id,
 		});
 	}
 };

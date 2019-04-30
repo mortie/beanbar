@@ -23,7 +23,7 @@ class Launcher extends ModComponent {
 	render(props, state) {
 		return this.el({
 			className: "clickable",
-			onClick: () => new IPCProc(props.cmd) },
+			onClick: () => this.ipcProc(props.cmd) },
 			props.text || props.cmd);
 	}
 }
@@ -102,7 +102,7 @@ class Audio extends ModComponent {
 		this.state.sinks = {};
 		this.setState();
 
-		let proc = new IPCProc("beanbar-stats audio", msg => {
+		let proc = this.ipcProc("beanbar-stats audio", msg => {
 			let parts = msg.split(":");
 			let evt = parts[0];
 			if (evt == "change") {
@@ -148,7 +148,7 @@ class Audio extends ModComponent {
 
 class Disk extends ModComponent {
 	componentDidMount() {
-		let proc = new IPCProc(IPC_EXEC_SH, `
+		let proc = this.ipcProc(IPC_EXEC_SH, `
 		read -r mount
 		while read; do
 			df -h "$mount" | grep -v "Avail" | awk '{print $4}'
@@ -170,7 +170,7 @@ Disk.defaultProps = { mount: "/" };
 
 class Battery extends ModComponent {
 	componentDidMount() {
-		let proc = new IPCProc(IPC_EXEC_SH, `
+		let proc = this.ipcProc(IPC_EXEC_SH, `
 		full="$(cat /sys/class/power_supply/BAT0/charge_full)"
 		while read; do
 			now="$(cat /sys/class/power_supply/BAT0/charge_now)"
@@ -207,7 +207,7 @@ class Network extends ModComponent {
 		this.state.connections = {};
 		this.setState();
 
-		let proc = new IPCProc("beanbar-stats network", msg => {
+		let proc = this.ipcProc("beanbar-stats network", msg => {
 			if (msg == "reset") {
 				this.state.connections = {};
 			} else {
@@ -253,7 +253,7 @@ class Memory extends ModComponent {
 	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
-		let proc = new IPCProc(IPC_EXEC_SH, `
+		let proc = this.ipcProc(IPC_EXEC_SH, `
 		while read; do
 			free | grep '^Mem' | awk  '{print $2 " " $7}'
 		done
@@ -279,7 +279,7 @@ class Processor extends ModComponent {
 	componentDidUpdate() { this.consistentWidth(); }
 
 	componentDidMount() {
-		let proc = new IPCProc("beanbar-stats processor", msg =>
+		let proc = this.ipcProc("beanbar-stats processor", msg =>
 			this.setState({ percent: msg }));
 
 		onUpdate(() => proc.send());
@@ -324,13 +324,13 @@ class I3Workspaces extends ModComponent {
 	componentDidMount() {
 		this.setState({ mode: "default" });
 
-		this.i3msg = new IPCProc(IPC_EXEC_SH, `
+		this.i3msg = this.ipcProc(IPC_EXEC_SH, `
 		while read -r cmd; do
 			i3-msg "$cmd"
 		done
 		`, msg => {});
 
-		let proc = new IPCProc("beanbar-stats i3workspaces", this.onMsg.bind(this));
+		let proc = this.ipcProc("beanbar-stats i3workspaces", this.onMsg.bind(this));
 
 		if (this.props.scroll) {
 			let scrollLim = 150;
