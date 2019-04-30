@@ -63,8 +63,9 @@ static int main(int argc, char **argv) {
 		abort();
 	}
 
-	if (fgets(sockpath, sizeof(sockpath) - 1, f) == NULL) {
-		fprintf(stderr, "fgets failed\n");
+	fread(sockpath, 1, sizeof(sockpath) - 1, f);
+	if (ferror(f)) {
+		perror("i3 --getsocketpath");
 		abort();
 	}
 	pclose(f);
