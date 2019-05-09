@@ -70,6 +70,8 @@ static int main(int argc, char **argv) {
 	}
 	pclose(f);
 
+	fprintf(stderr, "Opened i3 socket '%s'.\n", sockpath);
+
 	struct sockaddr_un addr;
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path, sockpath, sizeof(addr.sun_path) - 1);
