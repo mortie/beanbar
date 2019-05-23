@@ -187,32 +187,37 @@ static void on_msg(
 		WebKitUserContentManager *manager, WebKitJavascriptResult *jsresult,
 		gpointer data) {
 	struct ipc *ipc = (struct ipc *)data;
-	JSCValue *val = webkit_javascript_result_get_js_value(jsresult);
+	JSCValue *val = NULL;
+	JSCValue *valid = NULL;
+	JSCValue *valtype = NULL;
+	char *type = NULL;
+
+	val = webkit_javascript_result_get_js_value(jsresult);
 
 	if (!jsc_value_is_object(val)) {
 		warn("IPC expected object.");
-		return;
+		goto cleanup;
 	}
 
-	JSCValue *valid = jsc_value_object_get_property(val, "id");
+	valid = jsc_value_object_get_property(val, "id");
 	if (valid == NULL) {
 		warn("IPC expected object with an `id` property.");
-		return;
+		goto cleanup;
 	}
 
-	JSCValue *valtype = jsc_value_object_get_property(val, "type");
+	valtype = jsc_value_object_get_property(val, "type");
 	if (valtype == NULL) {
 		warn("IPC expected object with a `type` property.");
-		return;
+		goto cleanup;
 	}
 
-	char *type = jsc_value_to_string(valtype);
+	type = jsc_value_to_string(valtype);
 
 	if (strcmp(type, "exec") == 0) {
 		JSCValue *valmsg = jsc_value_object_get_property(val, "msg");
 		if (valmsg == NULL) {
 			warn("IPC 'exec' expected a 'msg' property.");
-			return;
+			goto cleanup;
 		}
 
 		char *msg = jsc_value_to_string(valmsg);
@@ -222,19 +227,25 @@ static void on_msg(
 		JSCValue *valmsg = jsc_value_object_get_property(val, "msg");
 		if (valmsg == NULL) {
 			warn("IPC 'write' expected a 'msg' property.");
-			return;
+			goto cleanup;
 		}
 
 		char *msg = jsc_value_to_string(valmsg);
 		handle_write(ipc, (int)jsc_value_to_double(valid), msg);
+
 		g_free(msg);
+		g_object_unref(valmsg);
 	} else if (strcmp(type, "kill") == 0) {
 		handle_kill(ipc, (int)jsc_value_to_double(valid));
 	} else {
 		warn("Unknown IPC message type: %s", type);
 	}
 
+cleanup:
+	if (val != NULL) g_object_unref(val);
+	if (valid != NULL) g_object_unref(valid);
 	g_free(type);
+	if (valtype != NULL) g_object_unref(valtype);
 	webkit_javascript_result_unref(jsresult);
 }
 
