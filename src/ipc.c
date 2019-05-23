@@ -242,7 +242,6 @@ static void on_msg(
 	}
 
 cleanup:
-	if (val != NULL) g_object_unref(val);
 	if (valid != NULL) g_object_unref(valid);
 	g_free(type);
 	if (valtype != NULL) g_object_unref(valtype);
