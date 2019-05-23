@@ -374,6 +374,7 @@ class I3Workspaces extends ModComponent {
 
 				acc += evt.deltaY;
 				let trigger =
+					evt.deltaY >= 10 ||
 					Math.abs(acc) > scrollLim ||
 					(Math.abs(acc) > minScroll && !recent);
 				if (!trigger)
