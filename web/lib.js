@@ -36,7 +36,7 @@ class Comp extends Component {
 	}
 
 	consistentWidth() {
-		let thresh = 1 * 60 * 1000;
+		let thresh = 5 * 60 * 1000;
 		let now = new Date().getTime();
 
 		// If it's been a while since it grew,
