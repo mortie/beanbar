@@ -7,12 +7,12 @@ SRCS = src/io.c src/ipc.c src/main.c src/providers/audio.c src/providers/i3works
 HDRS = src/io.h src/ipc.h src/providers/providers.h
 OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
 DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
-PUBLICHDRS = 
+PUBLICHDRS =
 
 # Defaults
 PKGS =
-EXTRADEPS = 
-EXTRAPUBLICDEPS = 
+EXTRADEPS =
+EXTRAPUBLICDEPS =
 CONFIG ?= release
 BUILDDIR ?= build
 BUILD ?= $(BUILDDIR)/$(CONFIG)
@@ -20,7 +20,7 @@ WARNINGS = -Wall -Wextra -Wno-unused-parameter
 SMAKEFILE ?= Smakefile
 DESTDIR ?=
 PREFIX ?= /usr/local
-PHONIES = dumpdeps dumppublicdeps dumpprojtype clean distclean
+PHONIES = dumpdeps dumppublicdeps dumpprojtype clean cleanall
 
 PKG_CONFIG ?= pkg-config
 AR ?= ar
@@ -30,7 +30,7 @@ CCOPTS_release = -O2 -flto
 CCOPTS_debug = -g
 CCOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(CCOPTS_debug)
 
-LDOPTS = 
+LDOPTS =
 LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
@@ -90,8 +90,8 @@ uninstall:
 clean:
 	rm -rf $(PROJNAME) $(BUILD)
 
-.PHONY: distclean
-distclean:
+.PHONY: cleanall
+cleanall:
 	rm -rf $(BUILDDIR)
 
 .PHONY: dumpdeps

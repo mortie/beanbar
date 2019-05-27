@@ -7,12 +7,12 @@ SRCS = src/bar.c src/ipc.c src/json.c src/main.c
 HDRS = src/bar.h src/ipc.h src/json.h src/log.h
 OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
 DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
-PUBLICHDRS = 
+PUBLICHDRS =
 
 # Defaults
 PKGS =
 EXTRADEPS = beanbar-stats/src/io.c beanbar-stats/src/ipc.c beanbar-stats/src/main.c beanbar-stats/src/providers/audio.c beanbar-stats/src/providers/i3workspaces.c beanbar-stats/src/providers/network.c beanbar-stats/src/providers/processor.c beanbar-stats/src/io.h beanbar-stats/src/ipc.h beanbar-stats/src/providers/providers.h
-EXTRAPUBLICDEPS = 
+EXTRAPUBLICDEPS =
 CONFIG ?= release
 BUILDDIR ?= build
 BUILD ?= $(BUILDDIR)/$(CONFIG)
@@ -20,7 +20,7 @@ WARNINGS = -Wall -Wextra -Wno-unused-parameter
 SMAKEFILE ?= Smakefile
 DESTDIR ?=
 PREFIX ?= /usr/local
-PHONIES = dumpdeps dumppublicdeps dumpprojtype clean distclean
+PHONIES = dumpdeps dumppublicdeps dumpprojtype clean cleanall
 
 PKG_CONFIG ?= pkg-config
 AR ?= ar
@@ -30,7 +30,7 @@ CCOPTS_release = -O2 -flto
 CCOPTS_debug = -g
 CCOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(CCOPTS_debug)
 
-LDOPTS = 
+LDOPTS =
 LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
@@ -94,10 +94,10 @@ clean:
 	rm -rf $(PROJNAME) $(BUILD)
 	$(MAKE) -C beanbar-stats clean
 
-.PHONY: distclean
-distclean:
+.PHONY: cleanall
+cleanall:
 	rm -rf $(BUILDDIR)
-	$(MAKE) -C beanbar-stats distclean
+	$(MAKE) -C beanbar-stats cleanall
 
 .PHONY: dumpdeps
 dumpdeps:
