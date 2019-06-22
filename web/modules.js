@@ -23,7 +23,7 @@ class Launcher extends ModComponent {
 	render(props, state) {
 		return this.el({
 			className: "clickable",
-			onClick: () => this.ipcProc(props.cmd) },
+			onClick: () => new IPCProc(props.cmd) },
 			props.text || props.cmd);
 	}
 }
