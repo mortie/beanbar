@@ -21,6 +21,7 @@ SMAKEFILE ?= Smakefile
 DESTDIR ?=
 PREFIX ?= /usr/local
 PHONIES = dumpdeps dumppublicdeps dumpprojtype clean cleanall
+CONFIGS = release sanitize debug
 
 PKG_CONFIG ?= pkg-config
 AR ?= ar
@@ -41,6 +42,12 @@ runpfx = @echo $(1) $(2) && $(2)
 all: $(BUILD)/$(PROJNAME)
 
 -include $(SMAKEFILE)
+
+ifeq ($(filter $(CONFIGS),$(CONFIG)),)
+ifeq ($(filter cleanall,$(MAKECMDGOALS)),)
+$(error Unknown config '$(CONFIG)'. Supported configs: $(CONFIGS))
+endif
+endif
 
 ifneq ($(PKGS),)
 CCOPTS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
