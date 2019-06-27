@@ -1,9 +1,15 @@
 PROJNAME = beanbar
-PKGS = gtk+-3.0 webkit2gtk-4.0
+PKGS = gtk+-3.0 webkit2gtk-4.0 wayland-client
 DEPENDS = beanbar-stats
 
-LDOPTS += -lpthread
+CCOPTS += -Igtk-layer-shell/usr/include
+LDOPTS += -lpthread -Lgtk-layer-shell/usr/lib/ -lgtk-layer-shell
 OBJS += $(BUILD)/obj/web.html.o
+$(SRCS): gtk-layer-shell/usr/lib/libgtk-layer-shell.a
+
+gtk-layer-shell/usr/lib/libgtk-layer-shell.a:
+	[ -f gtk-layer-shell/.git ] || git submodule update --init gtk-layer-shell
+	(cd gtk-layer-shell && ./autogen.sh && $(MAKE) && $(MAKE) install DESTDIR=`pwd` prefix=/usr)
 
 $(BUILD)/obj/web.html.o: $(BUILD)/obj/web.html
 	@mkdir -p $(@D)

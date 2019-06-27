@@ -3,8 +3,8 @@
 PROJNAME = beanbar
 PROJTYPE = exe
 
-SRCS = src/bar.c src/ipc.c src/json.c src/main.c
-HDRS = src/bar.h src/ipc.h src/json.h src/log.h
+SRCS = src/bar.c src/dispserv.c src/ipc.c src/json.c src/main.c
+HDRS = src/bar.h src/dispserv.h src/ipc.h src/json.h src/log.h
 OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
 DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
 PUBLICHDRS =
