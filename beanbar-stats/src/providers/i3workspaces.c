@@ -50,25 +50,30 @@ static char *i3_recv(int fd, size_t *len, int *type) {
 static int main(int argc, char **argv) {
 	(void)argc; (void)argv;
 
-	FILE *f = popen("i3 --get-socketpath", "r");
-	if (f == NULL) {
-		perror("i3 --get-socketpath");
-		return EXIT_FAILURE;
-	}
+	char sockpath[256] = { 0 };
+	char *swaysock = getenv("SWAYSOCK");
+	if (swaysock != NULL) {
+		strncpy(sockpath, swaysock, sizeof(sockpath) - 1);
+	} else {
+		FILE *f = popen("i3 --get-socketpath", "r");
+		if (f == NULL) {
+			perror("i3 --get-socketpath");
+			return EXIT_FAILURE;
+		}
 
-	char sockpath[256];
-	int ret;
-	if ((ret = fscanf(f, "%255s\n", sockpath)) != 1) {
-		fprintf(stderr, "fscanf returned %i, expected 1\n", ret);
-		abort();
-	}
+		int ret;
+		if ((ret = fscanf(f, "%255s\n", sockpath)) != 1) {
+			fprintf(stderr, "fscanf returned %i, expected 1\n", ret);
+			abort();
+		}
 
-	fread(sockpath, 1, sizeof(sockpath) - 1, f);
-	if (ferror(f)) {
-		perror("i3 --getsocketpath");
-		abort();
+		fread(sockpath, 1, sizeof(sockpath) - 1, f);
+		if (ferror(f)) {
+			perror("i3 --getsocketpath");
+			abort();
+		}
+		pclose(f);
 	}
-	pclose(f);
 
 	fprintf(stderr, "Opened i3 socket '%s'.\n", sockpath);
 
@@ -94,7 +99,10 @@ static int main(int argc, char **argv) {
 		size_t len;
 		int t;
 		char *pl = i3_recv(sockfd, &len, &t);
-		if (strcmp(pl, "{\"success\":true}") != 0) {
+		int success =
+			strcmp(pl, "{\"success\":true}") == 0 ||
+			strcmp(pl, "{\"success\": true}") == 0;
+		if (!success) {
 			fprintf(stderr, "Failed to subscribe: %s\n", pl);
 			return EXIT_FAILURE;
 		}
