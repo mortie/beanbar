@@ -423,6 +423,7 @@ class I3Workspaces extends ModComponent {
 	onMsg(msg) {
 		let type = msg.split(":")[0];
 		let json = msg.substr(type.length + 1);
+		console.log("JSON:", json);
 		let data;
 		try {
 			data = JSON.parse(json);
@@ -431,6 +432,8 @@ class I3Workspaces extends ModComponent {
 			console.log(msg);
 			return;
 		}
+
+		console.log(type);
 
 		if (type == "0x1") {
 			this.state.workspaces = [];
@@ -442,13 +445,17 @@ class I3Workspaces extends ModComponent {
 			this.setState();
 		} else if (type == "0x80000000") {
 			if (data.change == "focus") {
-				if (data.old) {
+				if (data.old)
 					this.state.workspaces[data.old.num] = data.old;
-				}
 				this.state.workspaces[data.current.num] = data.current;
 				this.state.workspaces[data.current.num].urgent = false;
 				this.state.workspaces[data.current.num].focused = true;
 				this.state.visible[data.current.output] = data.current.num;
+				this.setState();
+			} else if (data.change == "init") {
+				if (data.old)
+					this.state.workspaces[data.old.num] = data.old;
+				this.state.workspaces[data.current.num] = data.current;
 				this.setState();
 			} else if (data.change == "empty") {
 				delete this.state.workspaces[data.current.num];
