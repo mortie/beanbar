@@ -457,6 +457,14 @@ class I3Workspaces extends ModComponent {
 					this.state.workspaces[data.old.num] = data.old;
 				this.state.workspaces[data.current.num] = data.current;
 				this.setState();
+			} else if (data.change == "rename") {
+				this.state.workspaces[data.current.num] =
+					this.state.workspaces[this.state.visible[data.current.output]];
+				this.state.workspaces[data.current.num].name = data.current.name;
+				this.state.workspaces[data.current.num].num = data.current.num;
+				delete this.state.workspaces[this.state.visible[data.current.output]];
+				this.state.visible[data.current.output] = data.current.num;
+				this.setState();
 			} else if (data.change == "empty") {
 				delete this.state.workspaces[data.current.num];
 				this.setState();
