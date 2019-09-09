@@ -42,9 +42,11 @@ window.init = function init(...modules) {
 	let style = `grid-template-columns: repeat(${len}, 1fr);`;
 	render(h("div", { id: "bar", style }, ...modules), document.body);
 
-	document.body.addEventListener("resize", () =>
-		document.body.style.lineHeight = document.body.clientHeight+"px");
-	document.body.style.lineHeight = document.body.clientHeight+"px";
+	function resize() {
+		document.body.style.lineHeight = document.body.clientHeight+"px";
+	}
+	resize();
+	window.addEventListener("resize", resize);
 
 	triggerUpdate();
 	setInterval(triggerUpdate, conf.updateTime);
