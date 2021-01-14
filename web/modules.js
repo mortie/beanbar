@@ -337,8 +337,13 @@ class I3Workspaces extends ModComponent {
 		this.setState({ mode: "default" });
 
 		this.i3msg = this.ipcProc(IPC_EXEC_SH, `
+		if ! [ -z "$SWAYSOCK" ]; then
+			sendcmd="swaymsg"
+		else
+			sendcmd="i3-msg"
+		fi
 		while read -r cmd; do
-			i3-msg "$cmd"
+			"$sendcmd" "$cmd"
 		done
 		`, msg => {});
 
