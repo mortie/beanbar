@@ -292,8 +292,8 @@ static void *message_pump(void *data) {
 				debug("process %i died (code: %i)", ent->id, WEXITSTATUS(status));
 				ent->active = 0;
 				if (ent->tmpfd >= 0) {
-					close(ent->tmpfd);
-					unlink(ent->tmpf);
+					//close(ent->tmpfd);
+					//unlink(ent->tmpf);
 					free(ent->tmpf);
 				}
 				if (epoll_ctl(ipc->epollfd, EPOLL_CTL_DEL, ev->data.fd, NULL) < 0)

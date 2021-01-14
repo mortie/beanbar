@@ -150,7 +150,7 @@ class Disk extends ModComponent {
 	componentDidMount() {
 		let proc = this.ipcProc(IPC_EXEC_SH, `
 		read -r mount
-		while read; do
+		while read _; do
 			df -h "$mount" | grep -v "Avail" | awk '{print $4}'
 		done
 		`, msg => this.setState({ avail: msg }));
@@ -174,7 +174,7 @@ class Battery extends ModComponent {
 		read -r bat
 		path="/sys/class/power_supply/$bat"
 		full="$(cat "$path/charge_full")"
-		while read; do
+		while read _; do
 			now="$(cat "$path/charge_now")"
 			state="$(cat "$path/status")"
 			echo "$state:$(echo "($now / $full) * 100" | bc -l)"
@@ -266,7 +266,7 @@ class Memory extends ModComponent {
 
 	componentDidMount() {
 		let proc = this.ipcProc(IPC_EXEC_SH, `
-		while read; do
+		while read _; do
 			free | grep '^Mem' | awk  '{print $2 " " $7}'
 		done
 		`, msg => this.setState({ parts: msg.split(" ") }));
@@ -423,7 +423,6 @@ class I3Workspaces extends ModComponent {
 	onMsg(msg) {
 		let type = msg.split(":")[0];
 		let json = msg.substr(type.length + 1);
-		console.log("JSON:", json);
 		let data;
 		try {
 			data = JSON.parse(json);
@@ -432,8 +431,6 @@ class I3Workspaces extends ModComponent {
 			console.log(msg);
 			return;
 		}
-
-		console.log(type);
 
 		if (type == "0x1") {
 			this.state.workspaces = [];

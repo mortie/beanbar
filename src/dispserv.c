@@ -15,7 +15,8 @@
 static void init_wayland(struct bar *bar, struct bar_win *win) {
 	GdkRectangle geometry;
 	gdk_monitor_get_geometry(win->mon, &geometry);
-	gtk_window_set_default_size(GTK_WINDOW(win->win), geometry.width, bar->bar_height);
+	int scale = gdk_monitor_get_scale_factor(win->mon);
+	gtk_window_set_default_size(GTK_WINDOW(win->win), geometry.width / scale, bar->bar_height);
 
 	gtk_layer_init_for_window(GTK_WINDOW(win->win));
 	gtk_layer_set_layer(GTK_WINDOW(win->win), GTK_LAYER_SHELL_LAYER_TOP);
