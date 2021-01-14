@@ -204,6 +204,9 @@ class Battery extends ModComponent {
 
 	css() {
 		return `
+		module.Battery .charging {
+			color: var(--col-good);
+		}
 		module.Battery .low {
 			color: var(--col-urgent);
 		}
